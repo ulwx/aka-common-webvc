@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="js.build" default="compress" basedir="../">
+    <description>js.build for ANT</description>
+    <property name="src" location="src/main/webapp" />
+    <property name="build" location="ant-build/build" />
+    <property name="target" location="ant-build/target" />
+    <property name="lib" location="lib"/>
+    <property name="charset" value="utf-8"/>
+	<property name="ver" value="1.0"/>
+	<property name="compressor" value="${lib}/yuicompressor-2.4.7.jar"/>
+    <target name="init">
+        <mkdir dir="${build}"/>
+    	<mkdir dir="${target}"/>
+    </target>
+
+    <target name="concat-js" depends="init">
+
+        <concat destfile="${build}/jquery-pack.js" encoding="${charset}" outputencoding="${charset}">
+  		 <path path="${src}/js/jquery/jquery.js" />
+         <path path="${src}/js/jquery/jquery-migrate.js" />
+        </concat>
+    	
+    	 <concat destfile="${build}/jquery-easyui-pack.js" encoding="${charset}" outputencoding="${charset}">
+	         <path path="${src}/js/jquery.easyui/jquery.easyui.min.js" />
+	  		 <path path="${src}/js/jquery.easyui/locale/easyui-lang-zh_CN.js" />
+    	 </concat>
+    	<concat destfile="${build}/jquery-plugin-pack.js" encoding="${charset}" outputencoding="${charset}">
+       	 		<path path="${src}/js/jquery.plug/template-web.js" />
+	    	 	<path path="${src}/js/jquery.plug/jquery.json.js" />
+		  		<path path="${src}/js/jquery.plug/js.cookie.js" />
+	    	 	<path path="${src}/js/jquery.plug/jquery.populate.js" />
+	    	 	<path path="${src}/js/jquery.load/js/jquery.showLoading2.js" />
+	    	 	<path path="${src}/js/jquery.plug/jquery.namespace.js" />
+    			<path path="${src}/js/jquery.plug/easyui.ext.js" />
+    			<path path="${src}/js/jquery.easyui.ext/jquery.easyui.form.ext.js" />
+	    		<path path="${src}/js/jquery.plug/common.js" />
+	    		<path path="${src}/js/greenshoot/common.js" />
+       	 </concat>
+    	
+    </target>
+	<target name="concat-css" depends="init">
+        <concat destfile="${build}/page-rewrite.css" encoding="${charset}" outputencoding="${charset}" 
+        	fixlastline="true">
+		 <path path="${src}/css/page.css" />
+ 		 <path path="${src}/css/rewrite.css" />
+        </concat>
+	</target>
+	
+	<target name="compress" depends="clean,concat-css,concat-js">
+		<apply executable="java" parallel="false" failonerror="true" dest="${target}" append="false" force="true">
+		        <fileset dir="${build}">
+		            <include name="**/*.js" />
+		        </fileset>
+		        <arg line="-jar" />
+		        <arg path="${compressor}" />
+		        <arg line="--charset utf8" />
+		        <srcfile />
+		        <arg line="-o" />
+		        <mapper type="glob" from="*.js" to="*-min-${ver}.js" />
+		        <targetfile />
+		</apply>
+		<apply executable="java" parallel="false" failonerror="true" dest="${target}" append="false" force="true">
+		        <fileset dir="${build}">
+		            <include name="**/*.css" />
+		        </fileset>
+		        <arg line="-jar" />
+		        <arg path="${compressor}" />
+		        <arg line="--charset utf8" />
+		        <srcfile />
+		        <arg line="-o" />
+		        <mapper type="glob" from="*.css" to="*-min-${ver}.css" />
+		        <targetfile />
+		 </apply>
+		
+	</target>
+	
+    <target name="clean">
+        <delete dir="${build}"/>
+    	 <delete dir="${target}"/>
+    </target>
+
+</project>

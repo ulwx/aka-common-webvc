@@ -1,0 +1,58 @@
+
+# 命名空间映射，每个命名空间对应一个包，命名空间类似struts2的命名空间，用于隔离请求
+aka:
+  webvc:
+    namespaces: #下面定义命名空间名称
+#      sys:  # sys命名空间为预定义的，不能改变，固定为com.github.ulwx.aka.admin.web.action
+#        package-name: com.github.ulwx.aka.admin.web.action
+#        url-maps:
+#          #定义逻辑action名称，为action的URL部分，和命名空间名称构成请求URL，即/sys/sys_Login_login
+#          #逻辑action名称格式为[mod]-[action-name]-[action-method]或[mod]_[action-name]_[action-method]
+#          #  [mod]： 为action所在的模块名（所在的包名）
+#          #  [action-name]：为action的类名去掉Action后缀后的字符串，即action名
+#          #  [action-method] ：为action类的请求处理方法名
+#          sys_Login_login:
+#            success: /main.jsp  #success 为逻辑视图名称，action里使用
+#            error: redirect:/index.jsp #error 为逻辑视图名称，action里使用
+#          sys-Login-logout:
+#            success: redirect:/index.jsp
+#          #如果不满足[mod]-[action-name]-[action-method]或[mod]_[action-name]_[action-method]格式，则需要添加
+#          # mod-class-method-name属性指定映射到具体类的方法上。
+#          logout:
+#            mod-class-method-name: sys-Login-logout
+#            success: redirect:/index.jsp
+    global-views: #全局缺省逻辑视图到物理URL的映射，所有命名空间里的action都可以引用
+      # 在指定的物理URL里可以包含如下预定义变量：
+      #  {namespace}: 当前请求action的所在的命名空间
+      #  {mod} : 当前请求action的模块名
+      #  {action-name} : 为action类名去掉Action后缀后的字符串，即action名
+      #  {action-method} : 处理当前请求的action处理请求的方法名
+      #  {next}  : 当前请求action对象的next属性，
+      ok: /jsp/{namespace}/{mod}/{action-name}.jsp
+      success: /jsp/{namespace}/{mod}/{action-name}_{action-method}.jsp
+      next: /jsp/{namespace}/{mod}/{next}
+#      error: /message.jsp
+#      message: /message.jsp
+#      json: /json.jsp
+#      login: /index.jsp
+#      forward: /forward.jsp
+#      redirect: /redirect.jsp
+#      download: /download.jsp
+#      gate: /gate.jsp
+#      main: /main.jsp
+
+    index-url: forward:/index.jsp
+
+    ds-config:
+      #指定识别Dao类里每个方法所属的ds名称的策略。
+      #指定PARENT_DIR_NAME策略表明Dao上级目录的名称为ds名称。
+      #如果不指定或指定NONE则表明不启用识别ds名称的操作。
+      decider-strategy: PARENT_DIR_NAME
+      #指定AkaDynamicDataSource的bean名称，如果不指定或指定NONE，则根据AkaDynamicDataSource类型
+      #查找对应的AkaDynamicDataSource类型的Bean。
+      akaDynamicDataSourceName: NONE
+      groupLoadBalancer: random
+
+
+
+
