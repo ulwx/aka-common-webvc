@@ -8,24 +8,21 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMappi
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import javax.servlet.ServletContext;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
 public class MySpringWebMvcProvider extends SpringWebMvcProvider {
 
-    private  AkaWebMvcProperties akaWebMvcProperties;
-    Optional<ServletContext> servletContext;
+    private Optional<ServletContext> servletContext;
+    private List<RequestHandlerMappingCreator> requestHandlerMappingCreators;
 
-    public AkaWebMvcProperties getAkaWebMvcProperties() {
-        return akaWebMvcProperties;
+    public List<RequestHandlerMappingCreator> getRequestHandlerMappingCreators() {
+        return requestHandlerMappingCreators;
     }
     @Autowired
-    public void setAkaWebMvcProperties(AkaWebMvcProperties akaWebMvcProperties) {
-        this.akaWebMvcProperties = akaWebMvcProperties;
+    public void setRequestHandlerMappingCreators(List<RequestHandlerMappingCreator> requestHandlerMappingCreators) {
+        this.requestHandlerMappingCreators = requestHandlerMappingCreators;
     }
 
     public Optional<ServletContext> getServletContext() {
@@ -48,11 +45,13 @@ public class MySpringWebMvcProvider extends SpringWebMvcProvider {
                 if (rim instanceof RequestMappingHandlerMapping) {
                     RequestMappingHandlerMapping rmm = (RequestMappingHandlerMapping) rim;
                     try {
-                        RequestMappingHandlerMapping requestMappingHandlerMapping =
-                                SwaggerRequestMappingHandlerMapping.createRequestMappingHandlerMapping(rmm,
-                                        akaWebMvcProperties,servletContext);
-                        beansOfTypeRequestMappingHandlerMapping.put("swaggerRequestMappingHandlerMapping",
-                                requestMappingHandlerMapping);
+                        for (RequestHandlerMappingCreator creator:requestHandlerMappingCreators) {
+                            RequestMappingHandlerMapping requestMappingHandlerMapping =
+                                    creator.createRequestMappingHandlerMapping(rmm, servletContext);
+                            beansOfTypeRequestMappingHandlerMapping.put(
+                                    requestMappingHandlerMapping.getClass().getSimpleName(),
+                                    requestMappingHandlerMapping);
+                        }
                         break;
                     } catch (Exception e) {
                         throw new RuntimeException(e);

@@ -1,7 +1,10 @@
-<%@ page import="com.github.ulwx.aka.webmvc.utils.WebMvcCbConstants" %>
-<%@ page import="com.github.ulwx.aka.webmvc.utils.WebMvcCbConstants.SessionKey" %>
+<%@ page import="com.github.ulwx.aka.webmvc.WebMvcCbConstants" %>
+<%@ page import="com.github.ulwx.aka.webmvc.web.action.CbResultJson" %>
+<%@ page import="com.github.ulwx.aka.webmvc.web.action.ForwardReulst" %>
 <%@ page language="java" pageEncoding="UTF-8"%>
 <%
-	String forward_url=(String)request.getAttribute(SessionKey.ForwardKey);
+	CbResultJson resultJson=(CbResultJson)request.getAttribute(WebMvcCbConstants.ResultKey);
+	ForwardReulst result=(ForwardReulst)resultJson.getData();
+	String forward_url=result.getForwardURL();
 	request.getRequestDispatcher(forward_url).forward(request, response);
 %>

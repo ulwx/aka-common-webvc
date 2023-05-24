@@ -1,14 +1,12 @@
 
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@page import="com.ulwx.tool.EscapeUtil"%>
-<%@page import="com.ulwx.tool.ObjectUtils"%>
-<%@page import="com.ulwx.tool.StringUtils"%>
+<%@page import="com.github.ulwx.aka.webmvc.WebMvcCbConstants"%>
+<%@page import="com.github.ulwx.aka.webmvc.web.action.CbResultJson"%>
+<%@page import="java.util.Map"%>
 
 <%@page import="java.util.Set"%>
-<%@page import="java.util.Map"%>
-<%@ page import="com.github.ulwx.aka.webmvc.utils.WebMvcCbConstants" %>
-<%@ page import="com.github.ulwx.aka.webmvc.utils.WebMvcCbConstants.SessionKey" %>
+<%@ page import="com.github.ulwx.aka.webmvc.web.action.GateResult" %>
 <!DOCTYPE html>
 <%
 %>
@@ -19,8 +17,9 @@
 <title></title>
 </head>
 <%
-   
-	String postURL=(String)request.getAttribute(SessionKey.GateKey);
+	CbResultJson resultJson=(CbResultJson)request.getAttribute(WebMvcCbConstants.ResultKey);
+	GateResult gateResult=(GateResult)resultJson.getData();
+	String postURL=gateResult.getGateURL();
 
 %>
 <body >
@@ -30,7 +29,7 @@
 	<form id="form" method="post" action="<%=postURL%>"
 		style="width: 100%;visibility: hidden;">
 		<%
-		 	Map<String,String> parm = (Map) request.getAttribute(SessionKey.GateReqMap);
+		 	Map<String,String> parm = gateResult.getReqMap();
 			Set<String> keys = parm.keySet();
 			for (String key : keys) {
 				String val = (String) parm.get(key);

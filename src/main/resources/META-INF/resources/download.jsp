@@ -1,14 +1,17 @@
 
-<%@page import="com.ulwx.tool.StringUtils" %>
-<%@page import="java.io.*" %>
+<%@page import="com.github.ulwx.aka.webmvc.WebMvcCbConstants" %>
+<%@page import="com.github.ulwx.aka.webmvc.web.action.CbResultJson" %>
+<%@ page import="com.ulwx.tool.StringUtils" %>
+<%@ page import="java.io.*" %>
 <%@ page import="java.net.URLDecoder" %>
 <%@ page import="java.net.URLEncoder" %>
-<%@ page import="com.github.ulwx.aka.webmvc.utils.WebMvcCbConstants" %>
-<%@ page import="com.github.ulwx.aka.webmvc.utils.WebMvcCbConstants.SessionKey" %>
+<%@ page import="com.github.ulwx.aka.webmvc.web.action.DownLoadReulst" %>
 <%@ page language="java" pageEncoding="UTF-8" %>
 <%
-    File file = (File) request.getAttribute(SessionKey.DownloadKey);
-    String fileName = (String) request.getAttribute(SessionKey.DownloadName);
+    CbResultJson resultJson=(CbResultJson)request.getAttribute(WebMvcCbConstants.ResultKey);
+    DownLoadReulst result=(DownLoadReulst)resultJson.getData();
+    File file = (File) result.getFile();
+    String fileName = (String) result.getFileName();
 
     if (file != null) {
         InputStream in = null;

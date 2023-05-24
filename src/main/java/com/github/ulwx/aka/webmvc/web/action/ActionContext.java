@@ -87,7 +87,9 @@ public class ActionContext {
                 logger.error("" + e, e);
             }
         }
-        ruParms.putAll(request.getParameterMap());
+        Map<String, String[]> paramaterMap=request.getParameterMap();
+        ru.setRequestParamMap(paramaterMap);
+        ruParms.putAll(paramaterMap);
         request.setAttribute(ACTIONCONTEXT_REQUEST_UTILS,ru);
         return ru;
 

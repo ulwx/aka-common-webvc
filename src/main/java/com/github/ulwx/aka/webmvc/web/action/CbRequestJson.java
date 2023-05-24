@@ -2,7 +2,7 @@ package com.github.ulwx.aka.webmvc.web.action;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public class CbResultJson<T> {
+public class CbRequestJson<T> {
 
 	//"状态，200表示成功， -100表示失败
 		@Schema(name = "status", description = "状态码,1表示成功， 0表示失败")
@@ -44,8 +44,8 @@ public class CbResultJson<T> {
 			this.message = message;
 		}
 
-		public static CbResultJson of(int status ,int errorCode,String message, Object data){
-			CbResultJson resultJson=new CbResultJson();
+		public static CbRequestJson of(int status , int errorCode, String message, Object data){
+			CbRequestJson resultJson=new CbRequestJson();
 			resultJson.status=status;
 			resultJson.error=errorCode;
 			resultJson.message=message;

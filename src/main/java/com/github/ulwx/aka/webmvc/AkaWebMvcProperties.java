@@ -11,9 +11,9 @@ import java.util.*;
 @ConfigurationProperties(AkaConst.AkaWebMvcPropertiesPrefx)
 public class AkaWebMvcProperties implements InitializingBean {
     @NestedConfigurationProperty
-    private Map<String, NameSpace> namespaces;
+    private Map<String, NameSpace> namespaces=new HashMap<>();
     @NestedConfigurationProperty
-    private Map<String,String> globalViews;
+    private Map<String,String> globalViews=new HashMap<>();
     private String indexUrl;
 
     @NestedConfigurationProperty
@@ -116,7 +116,7 @@ public class AkaWebMvcProperties implements InitializingBean {
 
     public static class AccessFilter{
         private List<String> accessPlugins=new ArrayList<>();
-        private LinkedHashSet notFilterUrls;
+        private LinkedHashSet notFilterUrls=new LinkedHashSet();
 
         public List<String> getAccessPlugins() {
             return accessPlugins;

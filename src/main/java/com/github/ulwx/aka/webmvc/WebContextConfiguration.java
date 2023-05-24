@@ -2,9 +2,7 @@ package com.github.ulwx.aka.webmvc;
 
 import com.github.ulwx.aka.webmvc.exception.JsonServiceException;
 import com.github.ulwx.aka.webmvc.exception.JspServiceException;
-import com.github.ulwx.aka.webmvc.utils.WebMvcCbConstants;
-import com.github.ulwx.aka.webmvc.web.action.ActionSupport;
-import com.github.ulwx.aka.webmvc.web.action.CbResultJson;
+import com.github.ulwx.aka.webmvc.web.action.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,11 +66,21 @@ public class WebContextConfiguration implements WebMvcConfigurer {
 
                 ModelAndView modelAndView= super.doResolveException(request, response, handler, ex);
                 if(modelAndView!=null){
+                    CbResultJson content=CbResultJson.of(Status.ERR,0,
+                            ex.getMessage(), null);
                     if(ex instanceof JspServiceException){
-                        modelAndView.addObject(WebMvcCbConstants.SessionKey.MsgKey,ex.getMessage());
-                        modelAndView.addObject(WebMvcCbConstants.SessionKey.MsgReturnURL,"");
+                        MsgResult msgResult=new MsgResult();
+                        msgResult.setMsg( ex.getMessage());
+                        msgResult.setReturnURL("");
+                        CbResultJson ret=CbResultJson.of(Status.ERR,0, ex.getMessage(), msgResult);
+                        modelAndView.addObject(WebMvcCbConstants.ResultKey, ret);
                     }else if(ex instanceof JsonServiceException){
-                        modelAndView.addObject(WebMvcCbConstants.SessionKey.JsonKey, CbResultJson.ERR(ex, "异常"));
+                        //modelAndView.addObject(WebMvcCbConstants.SessionKey.JsonViewKey, CbResultJson.ERR(ex, "异常"));
+                        JsonResult jsonResult= new JsonResult();
+                        String callBack=request.getParameter("callback");
+                        jsonResult.setContent(content,callBack);
+                        CbResultJson ret=CbResultJson.of(Status.ERR,0, ex.getMessage(),jsonResult);
+                        modelAndView.addObject(WebMvcCbConstants.ResultKey, ret);
                     }
                 }
                 return modelAndView;
@@ -84,7 +92,7 @@ public class WebContextConfiguration implements WebMvcConfigurer {
         p.put(JspServiceException.class.getName(),messageView);
         p.put(JsonServiceException.class.getName(),jsonView);
         simpleMappingExceptionResolver.setExceptionMappings(p);
-        simpleMappingExceptionResolver.setExceptionAttribute(WebMvcCbConstants.SessionKey.ExceptionKey);
+        //simpleMappingExceptionResolver.setExceptionAttribute(WebMvcCbConstants.SessionKey.ExceptionKey);
         simpleMappingExceptionResolver.setDefaultStatusCode(200);
         resolvers.add(0,simpleMappingExceptionResolver);
 

@@ -1,9 +1,9 @@
 package com.github.ulwx.aka.webmvc.web.action;
 
+import com.github.ulwx.aka.webmvc.ActionMethodInfo;
 import com.github.ulwx.aka.webmvc.BeanGet;
-import com.github.ulwx.aka.webmvc.utils.WebMvcCbConstants;
-import com.github.ulwx.aka.webmvc.utils.WebMvcCbConstants.SessionKey;
-import com.github.ulwx.aka.webmvc.web.action.CbResultJson.STATUS;
+import com.github.ulwx.aka.webmvc.WebMvcActiionContextConst;
+import com.github.ulwx.aka.webmvc.WebMvcCbConstants;
 import com.ulwx.tool.ObjectUtils;
 import com.ulwx.tool.RequestUtils;
 import com.ulwx.tool.StringUtils;
@@ -33,8 +33,10 @@ public  class ActionSupport {
 	public  static  final String DOWNLOAD = "download";
 	public  static  final String ERROR = "error";
 	public  static  final String MESSAGE = "message";
-	public  static  final String LOGIN="login";
 	public static final String GATE="gate";
+
+	public  static  final String LOGIN="login";
+
 
 	public HttpServletRequest getRequest() {
 		return ServletActionContext.getRequest();
@@ -48,19 +50,19 @@ public  class ActionSupport {
 		return this.getRequest().getSession();
 	}
 	public static void setUserInfo(HttpServletRequest request,Object userInfo){
-		request.getSession().setAttribute(WebMvcCbConstants.SessionKey.USER,userInfo);
+		request.getSession().setAttribute(WebMvcCbConstants.USER,userInfo);
 	}
 	public static  Object getUserInfo(HttpServletRequest request) {
-		return   request.getSession().getAttribute(WebMvcCbConstants.SessionKey.USER);
+		return   request.getSession().getAttribute(WebMvcCbConstants.USER);
 	}
 	public  static  Object getUserInfo(HttpSession session) {
-		return   session.getAttribute(WebMvcCbConstants.SessionKey.USER);
+		return   session.getAttribute(WebMvcCbConstants.USER);
 	}
 	public  void setUserInfo(Object userInfo) {
-		this.getSession().setAttribute(WebMvcCbConstants.SessionKey.USER,userInfo);
+		this.getSession().setAttribute(WebMvcCbConstants.USER,userInfo);
 	}
 	public  Object getUserInfo() {
-		return   this.getSession().getAttribute(WebMvcCbConstants.SessionKey.USER);
+		return   this.getSession().getAttribute(WebMvcCbConstants.USER);
 	}
 
 	public void setNext(String next) {
@@ -77,8 +79,6 @@ public  class ActionSupport {
 
 		return response;
 	}
-
-
 	@SuppressWarnings("rawtypes")
 	public RequestUtils getRequestUtils() {
 		RequestUtils requestUtils= ActionContext.getContext().getRequestUtils(this.getRequest());
@@ -86,8 +86,13 @@ public  class ActionSupport {
 
 	}
 
+	public ActionMethodInfo getActionMethodInfo(){
+		ActionMethodInfo actionMethodInfo=(ActionMethodInfo)
+				ActionContext.getContext().get(WebMvcActiionContextConst.ActionMethodInfo);
+		return actionMethodInfo;
+	}
 	public <T> T getBean(Class<T> t) {
-		Map<String, Object[]> rParms = (Map) getRequest().getParameterMap();
+		Map<String, Object[]> rParms = getRequestUtils().getrParms();
 		try {
 			logger.debug(ObjectUtils.toString(rParms));
 			return ObjectUtils.fromMapToJavaBean(t.getConstructor().newInstance(), rParms);
@@ -127,128 +132,129 @@ public  class ActionSupport {
 		this.next=next;
 		return NEXT;
 	}
-	public  String JSON_SUC(String message, Object data){
+
+	private    CbResultJson buildResult(int status,int errorCode,Result result,String message){
+		CbResultJson rj=result.getResult(status,errorCode,message);
+		ActionContext  ctx = ActionContext.getContext();
+		ctx.put(WebMvcCbConstants.ResultKey,rj);
+		return rj;
+
+	}
+	public String errorView(int errorCode,String msg, String returnURL){
+		MsgResult msgResult=new MsgResult();
+		msgResult.setMsg(msg);
+		msgResult.setReturnURL(returnURL);
+		this.buildResult(Status.ERR,errorCode,msgResult,msg);
+		return ERROR;
+	}
+	public String msgView(String msg,String returnURL){
+		MsgResult msgResult=new MsgResult();
+		msgResult.setMsg(msg);
+		msgResult.setReturnURL(returnURL);
+		ActionContext ctx = ActionContext.getContext();
+		this.buildResult(Status.SUC,0,msgResult,msg);
+		return MESSAGE;
+	}
+	public  String JsonViewSuc(String message, Object data){
 		CbResultJson rj=new CbResultJson();
-		rj.setStatus(STATUS.SUC);
+		rj.setStatus(Status.SUC);
 		rj.setData(data);
 		rj.setError(0);
 		rj.setMessage(message);
 		ActionContext  ctx = ActionContext.getContext();
 		String ret= ObjectUtils.toJsonString(rj);
-		ctx.put(SessionKey.JsonKey, JSONP(ret));
+		JsonResult jsonResult=new JsonResult();
+		jsonResult.setContent(ret, this.getRequestUtils().getString("callback"));
+		this.buildResult(Status.SUC,0,jsonResult,message);
 		return JSON;
 
 	}
-
-	public String FOWARD_ERROR(String msg,String returnURL){
-		ActionContext  ctx = ActionContext.getContext();
-		ctx.put(WebMvcCbConstants.SessionKey.MsgKey,msg);
-		ctx.put(WebMvcCbConstants.SessionKey.MsgReturnURL,returnURL);
-		return ERROR;
-	}
-	public String FOWARD_MESSAGE(String msg,String returnURL){
-		ActionContext  ctx = ActionContext.getContext();
-		ctx.put(WebMvcCbConstants.SessionKey.MsgKey,msg);
-		ctx.put(WebMvcCbConstants.SessionKey.MsgReturnURL,returnURL);
-		return ERROR;
-	}
-	public  String JSON_SUC(){
-		return JSON_SUC("成功",null);
+	public  String JsonViewSuc(){
+		return JsonViewSuc("成功",null);
 	}
 
-	public  String JSON_SUC(Object data){
+	public  String JsonViewSuc(Object data){
 		if(data instanceof String){
-			return JSON_SUC(data.toString(),data);
+			return JsonViewSuc(data.toString(),data);
 		}
-		return JSON_SUC("成功",data);
+		return JsonViewSuc("成功",data);
 	}
 
-	public  String JSON_ERR(String message){
+	public  String JsonViewError(String message){
 
 		CbResultJson rj=new CbResultJson();
-		rj.setStatus(CbResultJson.STATUS.ERR);
+		rj.setStatus(Status.ERR);
 		rj.setMessage(message);
-		rj.setError(CbResultJson.ERROR.COMMON_ERROR);
-		ActionContext  ctx = ActionContext.getContext();
+		rj.setError(ErrorCode.COMMON_ERROR);
 		String ret=ObjectUtils.toJsonString2(rj,true,true);
-		ctx.put(SessionKey.JsonKey, JSONP(ret));
-		//logger.debug("ret="+JSONP(ret));
+
+		JsonResult jsonResult=new JsonResult();
+		jsonResult.setContent(ret, this.getRequestUtils().getString("callback"));
+		this.buildResult(Status.ERR,0,jsonResult,message);
 		return JSON;
 	}
 
-	public  String JSON_ERR(Exception e, String message){
-		CbResultJson rj=new CbResultJson();
-		rj.setStatus(STATUS.ERR);
-		rj.setMessage("["+message+"]"+e.toString());
-		rj.setError(CbResultJson.ERROR.COMMON_ERROR);
+	public CbResultJson getResult(String view){
 		ActionContext  ctx = ActionContext.getContext();
-		String ret= ObjectUtils.toJsonString2(rj,true,true);
-		ctx.put(SessionKey.JsonKey, JSONP(ret));
-		//logger.debug("ret="+JSONP(ret));
-		return JSON;
+		return (CbResultJson)ctx.get(WebMvcCbConstants.ResultKey);
+
 	}
-	public  String JSON_ERR(Integer errorCode, String message){
+	public  String JsonViewError(Integer errorCode, String message){
 
 		CbResultJson rj=new CbResultJson();
-		rj.setStatus(CbResultJson.STATUS.ERR);
+		rj.setStatus(Status.ERR);
 		rj.setData(null);
 		rj.setMessage(message);
 		rj.setError(errorCode);
-		ActionContext  ctx = ActionContext.getContext();
 		String ret=ObjectUtils.toJsonString2(rj,true,true);
-		ctx.put(SessionKey.JsonKey, JSONP(ret));
-		//logger.debug("ret="+JSONP(ret));
+		JsonResult jsonResult=new JsonResult();
+		jsonResult.setContent(ret, this.getRequestUtils().getString("callback"));
+		this.buildResult(Status.ERR,0,jsonResult,message);
 		return JSON;
 	}
-	public  String JSON_ERR(Integer errorCode){
+	public  String JsonViewError(Integer errorCode){
 
 		CbResultJson rj=new CbResultJson();
-		rj.setStatus(CbResultJson.STATUS.ERR);
+		rj.setStatus(Status.ERR);
 		rj.setData(null);
-		rj.setMessage(CbActionError.errors.get(errorCode));
+		rj.setMessage(ErrorCode.errors.get(errorCode));
 		rj.setError(errorCode);
-		ActionContext  ctx = ActionContext.getContext();
 		String ret=ObjectUtils.toJsonString2(rj,true,true);
-		ctx.put(SessionKey.JsonKey, JSONP(ret));
-		//logger.debug("ret="+JSONP(ret));
+		JsonResult jsonResult=new JsonResult();
+		jsonResult.setContent(ret, this.getRequestUtils().getString("callback"));
+		this.buildResult(Status.ERR,0,jsonResult,rj.getMessage());
 		return JSON;
+
 	}
-	public String FORWARD(String url){
-		ActionContext  ctx = ActionContext.getContext();
-		ctx.put(SessionKey.ForwardKey,url);
+	public String ForwardView(String url){
+		ForwardReulst forwardReulst=new ForwardReulst();
+		forwardReulst.setForwardURL(url);
+		this.buildResult(Status.SUC,0,forwardReulst,"成功！");
 		return FORWARD;
 	}
 
-	public String REDIRECT(String url){
-		ActionContext  ctx = ActionContext.getContext();
-		ctx.put(SessionKey.RedirectKey,url);
+	public String RedirectView(String url){
+
+		RedirectResult redirectResult=new RedirectResult();
+		redirectResult.setRedirectURL(url);
+		this.buildResult(Status.SUC,0,redirectResult,"成功！");
 		return REDIRECT;
 	}
 
-	public String DOWNLOAD(File file,String fileName){
-		ActionContext  ctx = ActionContext.getContext();
-		ctx.put(SessionKey.DownloadKey,file);
-		ctx.put(SessionKey.DownloadName,fileName);
+	public String DownloadView(File file,String fileName){
+
+		DownLoadReulst downLoadReulst=new DownLoadReulst();
+		downLoadReulst.setFile(file);
+		downLoadReulst.setFileName(fileName);
+		this.buildResult(Status.SUC,0,downLoadReulst,"成功！");
 		return DOWNLOAD;
 	}
-	public String GATE(String postURL,Map<String,String> gateReqMap){
-		ActionContext  ctx = ActionContext.getContext();
-		ctx.put(SessionKey.GateKey,postURL);
-		ctx.put(SessionKey.GateReqMap,gateReqMap);
-		return DOWNLOAD;
-	}
-	public  String JSON_ERR(Exception e){
-		return JSON_ERR(e,e.toString());
-	}
-	protected String JSONP(String content) {
-		RequestUtils ru = this.getRequestUtils();
-		String funcName = ru.getString("callback");
-		if (StringUtils.hasText(funcName)) {
-			String ret = funcName + "(" + content + ")";
-			return ret;
-		} else {
-			return content;
-		}
+	public String GateView(String postURL,Map<String,String> gateReqMap){
+		GateResult gateResult=new GateResult();
+		gateResult.setGateURL(postURL);
+		gateResult.setReqMap(gateReqMap);
+		this.buildResult(Status.SUC,0,gateResult, "");
+		return GATE;
 	}
 
 	public BeanGet getBeanGet() {

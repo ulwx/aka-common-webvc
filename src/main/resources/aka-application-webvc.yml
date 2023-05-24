@@ -21,6 +21,11 @@ aka:
 #          logout:
 #            mod-class-method-name: sys-Login-logout
 #            success: redirect:/index.jsp
+#       testapi:
+#          package-name: org.github.ulwx.aka.admin.test.action
+#          url-maps:
+#            "[*_*_*]":
+#              allow-methods: post,get
     global-views: #全局缺省逻辑视图到物理URL的映射，所有命名空间里的action都可以引用
       # 在指定的物理URL里可以包含如下预定义变量：
       #  {namespace}: 当前请求action的所在的命名空间

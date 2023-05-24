@@ -1,15 +1,15 @@
-<%@ page import="com.ulwx.tool.ObjectUtils" %>
-<%@ page import="com.github.ulwx.aka.webmvc.utils.WebMvcCbConstants.SessionKey" %>
+<%@ page import="com.github.ulwx.aka.webmvc.WebMvcCbConstants" %>
+<%@ page import="com.github.ulwx.aka.webmvc.web.action.JsonResult"%>
+<%@ page import="com.github.ulwx.aka.webmvc.web.action.CbResultJson"%>
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@ page contentType="application/json; charset=utf-8" language="java"
          errorPage=""%>
 <%
 	try
 	{
-		Object result = request.getAttribute(SessionKey.JsonKey);
-		result = result instanceof String ? result : ObjectUtils.toJsonString(result);
-		out.write((String) result);
-
+        CbResultJson resultJson=(CbResultJson)request.getAttribute(WebMvcCbConstants.ResultKey);
+		JsonResult result = (JsonResult)resultJson.getData();
+        out.write(result.getContent());
 	}
 	catch (Exception e)
 	{

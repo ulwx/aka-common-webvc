@@ -1,9 +1,10 @@
 package com.github.ulwx.aka.webmvc;
 
 import com.github.ulwx.aka.dbutils.tool.support.StringUtils;
-import com.github.ulwx.aka.webmvc.utils.WebMvcCbConstants;
-import com.github.ulwx.aka.webmvc.web.action.ActionSupport;
-import com.github.ulwx.aka.webmvc.web.action.CbResultJson;
+import com.github.ulwx.aka.webmvc.utils.WebMvcUtils;
+import com.github.ulwx.aka.webmvc.web.action.*;
+import com.ulwx.tool.NetUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.stereotype.Controller;
@@ -11,10 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+
 @Controller
 @RequestMapping("${server.error.path:${error.path:/error}}")
 public class BaseErrController implements ErrorController {
-
+    private static Logger log = Logger.getLogger(BaseErrController.class);
     private AkaWebMvcProperties akaWebMvcProperties;
 
     @Autowired
@@ -29,8 +33,22 @@ public class BaseErrController implements ErrorController {
         //WebMvcAutoConfiguration
         String statusCode = StringUtils.trim(request.getAttribute("javax.servlet.error.status_code"));
         String message = StringUtils.trim(request.getAttribute("javax.servlet.error.message"));
-        String exception=StringUtils.trim(request.getAttribute("javax.servlet.error.exception"));
-        message=message+";"+exception;
+        Exception exception=(Exception)request.getAttribute("javax.servlet.error.exception");
+        String exceptionStr="";
+        message=message+";";
+        ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+        PrintWriter printWriter=new PrintWriter(byteArrayOutputStream,true);
+        exception.printStackTrace(printWriter);
+        try {
+            exceptionStr=byteArrayOutputStream.toString("utf-8");
+        }catch (Exception e){
+            log.error(""+e,e);
+        }
+        exceptionStr=StringUtils.trim(exceptionStr);
+        if(exceptionStr.isEmpty()){
+            exceptionStr=StringUtils.trim(exception);
+        }
+        message=message+";"+exceptionStr;
         message=StringUtils.trimLeadingString(message,";");
         message=StringUtils.trimTailString(message,";");
         String errerSourceUrl = StringUtils.trim(request.getAttribute("javax.servlet.error.request_uri"));
@@ -43,15 +61,32 @@ public class BaseErrController implements ErrorController {
 
         }
         String messageView = "forward:" + akaWebMvcProperties.getGlobalViews().get(ActionSupport.MESSAGE);
-        String jsonView = "forward:" + akaWebMvcProperties.getGlobalViews().get( ActionSupport.JSON);
+        String jsonView = "forward:" + akaWebMvcProperties.getGlobalViews().get(ActionSupport.JSON);
         ModelAndView modelAndView = new ModelAndView();
-        if (WebMvcCbConstants.isAjax(errerSourceUrl)) {
-            modelAndView.addObject(WebMvcCbConstants.SessionKey.JsonKey, CbResultJson.ERR(message + "【" + statusCode + "】"));
+
+        if (WebMvcUtils.isAjax(errerSourceUrl)) {
+            String querStr=NetUtils.getQueryStrFromURL(errerSourceUrl);
+            String [] strs=NetUtils.urlQueryStrToMap(querStr,"utf-8").get("callback");
+            String callBack="";
+            if(strs!=null && strs.length==1){
+                callBack=strs[0];
+            }
+            JsonResult jsonResult= new JsonResult();
+            CbResultJson content=CbResultJson.of(Status.ERR,0,
+                    message + "【" + statusCode + "】", null);
+            jsonResult.setContent(content,callBack);
+            CbResultJson ret=CbResultJson.of(Status.ERR,0,
+                    message + "【" + statusCode + "】", jsonResult);
+            modelAndView.addObject(WebMvcCbConstants.ResultKey, ret);
             modelAndView.setViewName(jsonView);
         } else {
+            MsgResult msgResult=new MsgResult();
+            msgResult.setMsg(message + "【" + statusCode + "】");
+            //msgResult.setReturnURL(errerSourceUrl);
+            CbResultJson<MsgResult> ret=CbResultJson.of(Status.ERR,0,
+                    message + "【" + statusCode + "】", msgResult);
+            modelAndView.addObject(WebMvcCbConstants.ResultKey, ret);
             modelAndView.setViewName(messageView);
-            modelAndView.addObject(WebMvcCbConstants.SessionKey.MsgKey, message + "【" + statusCode + "】");
-            modelAndView.addObject(WebMvcCbConstants.SessionKey.MsgReturnURL, errerSourceUrl);
         }
 
         return modelAndView;
