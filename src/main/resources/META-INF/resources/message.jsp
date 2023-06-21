@@ -1,4 +1,4 @@
-<%@ page import="com.github.ulwx.aka.webmvc.web.action.CbResultJson" %>
+<%@ page import="com.github.ulwx.aka.webmvc.web.action.CbResult" %>
 <%@ page import="com.github.ulwx.aka.webmvc.web.action.MsgResult" %>
 <%@ page import="com.ulwx.tool.EscapeUtil" %>
 <%@ page import="com.github.ulwx.aka.webmvc.WebMvcCbConstants" %>
@@ -21,7 +21,7 @@
 
 <script  type="text/javascript" language="javascript">
 <%
-CbResultJson<MsgResult> resultJson=(CbResultJson)request.getAttribute(WebMvcCbConstants.ResultKey);
+CbResult<MsgResult> resultJson=(CbResult)request.getAttribute(WebMvcCbConstants.ResultKey);
 MsgResult msgResult=(MsgResult)resultJson.getData();
 String msg=msgResult.getMsg();
 String returnUrl=msgResult.getReturnURL();
@@ -46,7 +46,7 @@ function url(){
     <%
       if(!returnUrl.equals("")){
     %>
-    <div  style="text-align: center;margin-top:10px">
+    <div  style="margin-left: 40px;margin-top:10px">
         <a  href="javascript:void(0)"  onclick="url()">确定</a>
     </div>
     <%}%>

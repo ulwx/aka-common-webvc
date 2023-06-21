@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Order(-1)
-@Component
+@Component("com.github.ulwx.aka.webmvc.AkaDaoDsAspect")
 @ConditionalOnProperty(prefix="aka.webvc.ds-config",
         name = "decider-strategy" ,havingValue = "PARENT_DIR_NAME")
 public class AkaDaoDsAspect extends AkaAbsctractDataSourceAspect {
@@ -41,6 +41,7 @@ public class AkaDaoDsAspect extends AkaAbsctractDataSourceAspect {
             "&& !@within(com.github.ulwx.aka.dbutils.spring.multids.AkaDS)")
     @Override
     public void dsPointCut() {
+
     }
 
     @Override

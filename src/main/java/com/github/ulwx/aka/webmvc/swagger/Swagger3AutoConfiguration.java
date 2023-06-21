@@ -1,6 +1,4 @@
 package com.github.ulwx.aka.webmvc.swagger;
-
-
 import com.github.ulwx.aka.webmvc.web.action.ActionSupport;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -12,25 +10,22 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.collections4.map.HashedMap;
-import org.springdoc.core.OpenAPIService;
-import org.springdoc.core.PropertyResolverUtils;
-import org.springdoc.core.SecurityService;
-import org.springdoc.core.SpringDocConfigProperties;
+import org.springdoc.core.*;
 import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
 import org.springdoc.core.customizers.ServerBaseUrlCustomizer;
 import org.springdoc.core.providers.JavadocProvider;
 import org.springdoc.webmvc.core.SpringWebMvcProvider;
 import org.springframework.beans.BeansException;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Configuration
+//@Configuration
 @OpenAPIDefinition(
         info = @Info(
                 title = "Swagger3",
@@ -47,7 +42,8 @@ import java.util.Optional;
 
 @SecurityScheme(type = SecuritySchemeType.APIKEY, name = "Authorization", in = SecuritySchemeIn.HEADER)
 //@Profile({"dev", "test"})
-public class Swagger3Configuration implements ApplicationContextAware {
+@AutoConfigureBefore(SpringDocConfiguration.class)
+public class Swagger3AutoConfiguration implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
@@ -55,7 +51,6 @@ public class Swagger3Configuration implements ApplicationContextAware {
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
-
     @Bean
     public OpenAPIService openAPIBuilder(Optional<OpenAPI> openAPI,
                                          SecurityService securityParser,

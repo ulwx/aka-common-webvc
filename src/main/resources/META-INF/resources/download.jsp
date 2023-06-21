@@ -1,15 +1,15 @@
 
 <%@page import="com.github.ulwx.aka.webmvc.WebMvcCbConstants" %>
-<%@page import="com.github.ulwx.aka.webmvc.web.action.CbResultJson" %>
+<%@page import="com.github.ulwx.aka.webmvc.web.action.CbResult" %>
 <%@ page import="com.ulwx.tool.StringUtils" %>
 <%@ page import="java.io.*" %>
 <%@ page import="java.net.URLDecoder" %>
 <%@ page import="java.net.URLEncoder" %>
-<%@ page import="com.github.ulwx.aka.webmvc.web.action.DownLoadReulst" %>
+<%@ page import="com.github.ulwx.aka.webmvc.web.action.DownLoadResult" %>
 <%@ page language="java" pageEncoding="UTF-8" %>
 <%
-    CbResultJson resultJson=(CbResultJson)request.getAttribute(WebMvcCbConstants.ResultKey);
-    DownLoadReulst result=(DownLoadReulst)resultJson.getData();
+    CbResult resultJson=(CbResult)request.getAttribute(WebMvcCbConstants.ResultKey);
+    DownLoadResult result=(DownLoadResult)resultJson.getData();
     File file = (File) result.getFile();
     String fileName = (String) result.getFileName();
 

@@ -4,8 +4,8 @@ public interface Result {
 
     public ResultType getType();
 
-    public default CbResultJson<? extends Result> getResult(int status,int errorCode,String message){
-        CbResultJson rj=new CbResultJson();
+    public default CbResult<? extends Result> getResult(int status, int errorCode, String message){
+        CbResult rj=new CbResult();
         rj.setStatus(status);
         rj.setData(this);
         rj.setError(errorCode);

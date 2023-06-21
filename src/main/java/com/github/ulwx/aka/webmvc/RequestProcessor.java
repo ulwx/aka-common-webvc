@@ -16,9 +16,10 @@ public interface RequestProcessor {
 	 * @param context
 	 * @return  如果返回null，则继续下一个处理；
 	 * 返回非空对象，不会执行下一个RequestProcessor#onBefore()，并且会拦截正常的Action方法执行，
-	 * 并且使用返回的非空对象（字符串）作为最终响应逻辑视图名称。
+	 * 并且使用返回的逻辑视图名称作为响应。
 	 */
-	default String onBefore(HttpServletRequest request, ActionMethodInfo actionMethodInfo,RequestUtils context) {
+	default String onBefore(HttpServletRequest request,
+							ActionMethodInfo actionMethodInfo,RequestUtils context) {
 		return null;
 	}
 
@@ -27,11 +28,12 @@ public interface RequestProcessor {
 	 * @param request
 	 * @param actionMethodInfo
 	 * @param context
-	 * @param result
+	 * @param resultViewName
 	 * @return 如果返回null，则继续下一个处理。返回非空，则不会执行下一个RequestProcessor#onBefore()，
-	 * 并且使用返回的非空对象（字符串）作为最终响应逻辑视图名称。
+	 * 并且使用返回的逻辑视图名称作为响应。
 	 */
-	default String onAfter(HttpServletRequest request,ActionMethodInfo actionMethodInfo, RequestUtils context,Object result) {
+	default String onAfter(HttpServletRequest request, ActionMethodInfo actionMethodInfo,
+								 RequestUtils context, String resultViewName) {
 		return null;
 	}
 
@@ -40,10 +42,19 @@ public interface RequestProcessor {
 	 * @param request
 	 * @param actionMethodInfo
 	 * @param context
+	 * @param e 只有
+	 *     start(0),
+	 *     onBeforeComplete(1),
+	 *     actionComplete(2),
+	 *     onAfterComplete(3)
+	 *    这四种状态可能发生
 	 * @return 如果返回null，则继续下一个处理。返回非空，则不会执行下一个RequestProcessor#onException()，
-	 * 	 并且使用返回的非空对象（字符串）作为最终响应逻辑视图名称。
+	 * 	 并且使用返回的逻辑视图名称作为响应。
 	 */
-	default String onException(HttpServletRequest request, ActionMethodInfo actionMethodInfo,RequestUtils context) {
+	default String onException(HttpServletRequest request,
+							   ActionMethodInfo actionMethodInfo,
+							   RequestUtils context,
+							   Exception e,ProcessorStatus status) {
 		return null;
 	}
 
@@ -52,12 +63,15 @@ public interface RequestProcessor {
 	 * @param request
 	 * @param actionMethodInfo
 	 * @param context
-	 * @param result
-	 * @return 如果返回null，则继续下一个处理。返回非空，则不会执行下一个RequestProcessor#onFinished()，
-	 * 	 	并且使用返回的非空对象（字符串）作为最终响应逻辑视图名称。
+	 * @param resultViewName
+	 * @param e
+	 * @param status 任何一种状态都可能发生
+	 * @return 如果返回true，则继续下一个处理。返回false，则不会执行下一个RequestProcessor#onFinished()。
 	 */
-	default String onFinished(HttpServletRequest request,ActionMethodInfo actionMethodInfo, RequestUtils context,Object result) {
-		return null;
+	default boolean onFinished(HttpServletRequest request,ActionMethodInfo actionMethodInfo,
+							RequestUtils context,String resultViewName,Exception e,ProcessorStatus status
+	) {
+		return true;
 	}
 }
 

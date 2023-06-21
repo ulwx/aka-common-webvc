@@ -1,6 +1,7 @@
 package com.github.ulwx.aka.webmvc.web.action;
 
-public class ForwardReulst implements Result{
+public class ForwardResult implements Result{
+    // 格式为 /<jspname>
     private String forwardURL;
 
     public String getForwardURL() {

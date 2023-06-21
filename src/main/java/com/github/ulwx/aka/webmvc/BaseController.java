@@ -8,10 +8,7 @@ import com.github.ulwx.aka.webmvc.exception.JspServiceException;
 import com.github.ulwx.aka.webmvc.exception.ServiceException;
 import com.github.ulwx.aka.webmvc.utils.WebMvcUtils;
 import com.github.ulwx.aka.webmvc.web.action.*;
-import com.ulwx.tool.ArrayUtils;
-import com.ulwx.tool.ObjectUtils;
-import com.ulwx.tool.RequestUtils;
-import com.ulwx.tool.StringUtils;
+import com.ulwx.tool.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -32,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@Controller("com.github.ulwx.aka.webmvc.BaseController")
 public class BaseController implements ApplicationContextAware {
     private static Logger log = Logger.getLogger(BaseController.class);
     private ApplicationContext applicationContext;
@@ -101,135 +98,170 @@ public class BaseController implements ApplicationContextAware {
         }
     }
 
-    private Object onBefore(HttpServletRequest request, ActionMethodInfo actionMethodInfo, RequestUtils context) {
+    private String onBefore(HttpServletRequest request, ActionMethodInfo actionMethodInfo, RequestUtils context) {
         for (int i = 0; i < requestProcessors.size(); i++) {
             RequestProcessor requestProcessor = requestProcessors.get(i);
-            Object ret = requestProcessor.onBefore(request, actionMethodInfo, context);
+            String ret = requestProcessor.onBefore(request, actionMethodInfo, context);
             if (ret != null) return ret;
 
         }
         return null;
     }
 
-    private Object onAfter(HttpServletRequest request, ActionMethodInfo actionMethodInfo, RequestUtils context, Object result) {
+    private String onAfter(HttpServletRequest request, ActionMethodInfo actionMethodInfo,
+                           RequestUtils context, String result) {
         for (int i = 0; i < requestProcessors.size(); i++) {
             RequestProcessor requestProcessor = requestProcessors.get(i);
-            Object ret = requestProcessor.onAfter(request, actionMethodInfo, context, result);
+            String ret = requestProcessor.onAfter(request, actionMethodInfo, context, result);
             if (ret != null) return ret;
 
         }
         return null;
     }
 
-    private Object onExcepton(HttpServletRequest request, ActionMethodInfo actionMethodInfo, RequestUtils context) {
+    private String onExcepton(HttpServletRequest request, ActionMethodInfo actionMethodInfo,
+                              RequestUtils context,
+                              Exception e,ProcessorStatus status) {
         for (int i = 0; i < requestProcessors.size(); i++) {
             RequestProcessor requestProcessor = requestProcessors.get(i);
-            Object ret = requestProcessor.onException(request, actionMethodInfo, context);
+            String ret = requestProcessor.onException(request, actionMethodInfo, context,e,status);
             if (ret != null) return ret;
 
         }
         return null;
     }
 
-    private Object onFinished(HttpServletRequest request, ActionMethodInfo actionMethodInfo, RequestUtils context, Object result) {
+    private void onFinished(HttpServletRequest request, ActionMethodInfo actionMethodInfo,
+                              RequestUtils context, String result,Exception e,ProcessorStatus status) {
         for (int i = 0; i < requestProcessors.size(); i++) {
             RequestProcessor requestProcessor = requestProcessors.get(i);
-            Object ret = requestProcessor.onFinished(request, actionMethodInfo, context, result);
-            if (ret != null) return ret;
+            boolean ret = requestProcessor.onFinished(request, actionMethodInfo, context, result,e,status);
+            if (!ret) return ;
 
         }
-        return null;
+        return ;
     }
 
     public static boolean checkMethod(Method method){
         if(method.getParameterTypes()!=null && method.getParameterTypes().length>1){
             return false;
         }
-        if(method.getParameterTypes().length==1){
-            Class pType=method.getParameterTypes()[0];
-            if(!CbRequestJson.class.isAssignableFrom(pType)){
-                return false;
-            }
-        }
+//        if(method.getParameterTypes().length==1){
+//            Class pType=method.getParameterTypes()[0];
+//            if(!CbRequestJson.class.isAssignableFrom(pType)){
+//                return false;
+//            }
+//        }
         if(method.getReturnType()!=String.class
-                &&  !CbResultJson.class.isAssignableFrom(method.getReturnType())){
+                &&  !CbResult.class.isAssignableFrom(method.getReturnType())){
             return false;
         }
         return true;
     }
-    private Object run(ActionMethodInfo actionMethodInfo,
+    private String run(ActionMethodInfo actionMethodInfo,
                        HttpServletRequest request) throws Exception {
         RequestUtils requestUtils = ActionContext.getContext().getRequestUtils(request);
         ActionContext.getContext().put(WebMvcActiionContextConst.ActionMethodInfo,actionMethodInfo);
         ActionSupport cba = actionMethodInfo.getActionObj();
         Object ret = null;
-        int exeStatus = 0;
+        String viewName="";
+        Exception exception=null;
+        ProcessorStatus processorStatus=null;
         try {
-            Object beforeRet = this.onBefore(request, actionMethodInfo, requestUtils);
-            exeStatus = 1;
-            if (beforeRet == null) {
+            processorStatus = ProcessorStatus.Start;
+            String beforeRet = this.onBefore(request, actionMethodInfo, requestUtils);
+            processorStatus=ProcessorStatus.OnBeforeComplete;
+            if(beforeRet!=null){
+                viewName=beforeRet;
+
+            }else{
                 Method method=actionMethodInfo.getAnnoClassMethodInfo().getMethod();
                 boolean checked=checkMethod(method);
                 if(!checked){
                     throw new ServiceException(method+"方法不满足执行条件!");
                 }
-                Type returnType=method.getGenericReturnType();
+                //Type returnType=method.getGenericReturnType();
                 Type[] parmaterTypes=method.getGenericParameterTypes();
-                Object bodyObj=null;
+                Object argObj=null;
                 boolean hasParam=false;
                 if(parmaterTypes !=null){
                     if(parmaterTypes.length>1) throw new ServiceException("请求的参数的个数不能大于1个！");
                     if(parmaterTypes.length==1){
-                        ParameterizedType pType=(ParameterizedType)parmaterTypes[0];
-                        bodyObj=requestUtils.getBody(pType);
-                        hasParam=true;
+                        if(parmaterTypes[0] instanceof ParameterizedType){
+                            ParameterizedType pType = (ParameterizedType) parmaterTypes[0];
+                            argObj = requestUtils.getBody(pType);
+                        }else {
+                            if(parmaterTypes[0] instanceof Class) {
+                                Class clazz = (Class) parmaterTypes[0];
+                                argObj = ObjectUtils.fromMapToJavaBean(clazz.newInstance(), requestUtils.getrParms());
+                            }else{
+                                throw new RuntimeException("不支持请求参数为"+parmaterTypes[0]+"类型！");
+                            }
+                        }
+                        hasParam = true;
                     }
 
                 }
                 if(hasParam) {
-                    ret = method.invoke(cba,bodyObj);
+                    ret = method.invoke(cba,argObj);
                 }else{
                     ret = method.invoke(cba);
                 }
                 if(ret!=null){
-                    if(ret instanceof CbResultJson){
-                        Result dataResult=(Result)((CbResultJson<?>) ret).getData();
-                        request.setAttribute(WebMvcCbConstants.ResultKey,
-                                ret );
-                        ret=dataResult.getType().toString();
+                    if(ret instanceof CbResult){
+                        Object dataResult=((CbResult<?>) ret).getData();
+                        request.setAttribute(WebMvcCbConstants.ResultKey, ret );
+                        if(dataResult instanceof Result) {
+                            viewName =( (Result)dataResult).getType().toString();
+                        }else{ //json
+                            viewName=ResultType.json.toString();
+                        }
 
+                    }else if(ret instanceof  String){
+                        viewName=ret.toString();
+                    }else{
+                        viewName=ResultType.json.toString();
+                        CbResult cbResult=new CbResult();
+                        cbResult.setData(ret);
+                        request.setAttribute(WebMvcCbConstants.ResultKey, ret );
                     }
                 }
-                exeStatus = 2;
-                Object afterRet = this.onAfter(request, actionMethodInfo, requestUtils, ret);
-                exeStatus = 3;
+                processorStatus = ProcessorStatus.ActionComplete;
+                String afterRet = this.onAfter(request, actionMethodInfo, requestUtils, viewName);
+                processorStatus = ProcessorStatus.OnAfterComplete;
                 if (afterRet != null) {
-                    ret = afterRet;
+                    viewName=afterRet;
                 }
-            } else {
-                ret = beforeRet;
+
             }
+
 
         } catch (Exception e) {
-            log.error(e+",exeStatus="+exeStatus+",ret="+ret,e);
-            if (exeStatus == 1) {
-                Object exceptonRet = this.onExcepton(request, actionMethodInfo, requestUtils);
-                exeStatus = 4;
+            String exceptonRet=null;
+            log.error(e+",exeStatus="+processorStatus+",ret="+ret,e);
+            exception=e;
+            try {
+                exceptonRet= this.onExcepton(request, actionMethodInfo, requestUtils, exception,processorStatus);
+                processorStatus = ProcessorStatus.OnExceptionComplete;
                 if (exceptonRet != null) {
-                    ret = exceptonRet;
+                    viewName = exceptonRet;
+
                 }
-            }
-            throw e;
-        } finally {
-            if (exeStatus == 3 || exeStatus == 4) {
-                Object finishedRet = this.onFinished(request, actionMethodInfo, requestUtils, ret);
-                if (finishedRet != null) {
-                    ret = finishedRet;
+            }catch (Exception ex){
+                exception.addSuppressed(ex);
+                log.error(ex+"",exception);
+                processorStatus = ProcessorStatus.OnExceptionHasError;
+            }finally {
+                if(StringUtils.isEmpty(viewName)) {
+                    throw new ServiceException(exception);
                 }
             }
 
+        } finally {
+            this.onFinished(request, actionMethodInfo, requestUtils, viewName,exception,processorStatus);
+
         }
-        return ret;
+        return viewName;
     }
 
     private ActionMethodInfo parseRequest(NameSpace nameSpace,
@@ -414,30 +446,26 @@ public class BaseController implements ApplicationContextAware {
             actionMethodInfo.setAnnoClassMethodInfo(annoClassMethodInfo);
             actionMethodInfo.setJSONResponse(isJSONResponse);
             //运行处理方法
-            Object ret = this.run(actionMethodInfo, request);
+            String viewName = this.run(actionMethodInfo, request);
             ActionSupport cba = actionMethodInfo.getActionObj();
-            if (ret != null && ret.equals("json")) {
-                isJSONResponse = true;
-                if (log.isDebugEnabled()) {
-                    log.debug("ret=" + ObjectUtils.toString(cba.getContext().get(WebMvcCbConstants.ResultKey)));
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("ret=" + ret);
+            if (viewName != null ) {
+                if (viewName.equals("json")) {
+                    isJSONResponse = true;
                 }
             }
-            if (ret != null && !(ret instanceof String)) {
-                throw new ServiceException("方法返回的逻辑视图名称必须为字符串！" + actionMethodInfo.getActionClassFullName()
-                        + "#" + actionMethodInfo.getMethodName() + "()");
+            if (log.isDebugEnabled()) {
+               CbResult cbResult = (CbResult)cba.getContext().get(WebMvcCbConstants.ResultKey);
+               if(cbResult !=null) {
+                   log.debug("ret=" + ObjectUtils.toString(cbResult));
+               }
             }
-            String returnView = "";
-
+            String finalViewURL = "";
             String viewURL = null;
-            ret = StringUtils.trim(ret);
+            viewName = StringUtils.trim(viewName);
             Map<String, String> viewsMap = actionMethodInfo.getViewsMap();
             if (viewsMap != null) {
-                viewURL = StringUtils.trim(viewsMap.get(ret));
-                returnView = StringUtils.trim(this.getView(viewURL, actionMethodInfo.getLogicActionMethodName()));
+                viewURL = StringUtils.trim(viewsMap.get(viewName));
+                finalViewURL = StringUtils.trim(this.getView(viewURL, actionMethodInfo.getLogicActionMethodName()));
             }
 
             //查找全局逻辑视图
@@ -447,28 +475,25 @@ public class BaseController implements ApplicationContextAware {
              *  {mod} : 当前请求action的模块名
              *  {action-name} : 为action类名去掉Action后缀后的字符串，即action名
              *  {action-method} : 处理当前请求的action处理请求的方法名
-             *  {next}  : 当前请求action对象的next属性，
              */
-            viewURL = akaWebMvcProperties.getGlobalViews().get(ret);
-            if (returnView.isEmpty() && StringUtils.hasText(viewURL)) {
+            viewURL = akaWebMvcProperties.getGlobalViews().get(viewName);
+            if (finalViewURL.isEmpty() && StringUtils.hasText(viewURL)) {
                 viewURL = viewURL.replace("{namespace}", namespace);
                 viewURL = viewURL.replace("{mod}", actionMethodInfo.getMod());
                 viewURL = viewURL.replace("{action-name}", actionMethodInfo.getActionLogicName());
                 viewURL = viewURL.replace("{action-method}", actionMethodInfo.getMethodName());
-                if (ret.toString().equals("next")) {
-                    viewURL = viewURL.replace("{next}", actionMethodInfo.getActionObj().getNext());
-                }
-                returnView = this.getView(viewURL, actionMethodInfo.getLogicActionMethodName());
+
+                finalViewURL = this.getView(viewURL, actionMethodInfo.getLogicActionMethodName());
 
             }
-            returnView=StringUtils.trim(returnView);
-            if(StringUtils.isEmpty(returnView)) {
+            finalViewURL=StringUtils.trim(finalViewURL);
+            if(StringUtils.isEmpty(finalViewURL)) {
                 throw new ServiceException(logicActionMethodName + "没有找到相应的视图！");
             }
             if (log.isDebugEnabled()) {
-                log.debug("returnView=" + returnView);
+                log.debug("returnView=" + finalViewURL);
             }
-            return returnView;
+            return finalViewURL;
 
         } catch (Exception ex) {
             log.error(ex + "", ex);

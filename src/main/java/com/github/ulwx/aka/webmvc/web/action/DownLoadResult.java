@@ -2,7 +2,7 @@ package com.github.ulwx.aka.webmvc.web.action;
 
 import java.io.File;
 
-public class DownLoadReulst implements Result{
+public class DownLoadResult implements Result{
 
     private File file;
     private String fileName;

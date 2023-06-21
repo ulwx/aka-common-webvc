@@ -26,7 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
     }
 
      /**
-      * 如果子类覆盖此方法，返回指定的数据源名称，则会使用getTemplate()返回的MDataBaseTemplate实例的方法会使用此数据源
+      * 如果子类覆盖此方法，并返回指定的数据源名称，
+      * 则getTemplate()返回的MDataBaseTemplate实例会使用此数据源。
+      * 当然也可以在Dao类上通过@AkaDS注解指定数据源。
       * @return
       */
     public 	 String getDS(){ return "" ;}

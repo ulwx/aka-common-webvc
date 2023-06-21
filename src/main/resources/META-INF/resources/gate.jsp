@@ -2,7 +2,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@page import="com.github.ulwx.aka.webmvc.WebMvcCbConstants"%>
-<%@page import="com.github.ulwx.aka.webmvc.web.action.CbResultJson"%>
+<%@page import="com.github.ulwx.aka.webmvc.web.action.CbResult"%>
 <%@page import="java.util.Map"%>
 
 <%@page import="java.util.Set"%>
@@ -17,7 +17,7 @@
 <title></title>
 </head>
 <%
-	CbResultJson resultJson=(CbResultJson)request.getAttribute(WebMvcCbConstants.ResultKey);
+	CbResult resultJson=(CbResult)request.getAttribute(WebMvcCbConstants.ResultKey);
 	GateResult gateResult=(GateResult)resultJson.getData();
 	String postURL=gateResult.getGateURL();
 

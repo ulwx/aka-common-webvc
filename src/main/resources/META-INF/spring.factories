@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.github.ulwx.aka.webmvc.AkaWebMvcConfiguration
+  com.github.ulwx.aka.webmvc.AkaWebMvcAutoConfiguration,\
+  com.github.ulwx.aka.webmvc.swagger.Swagger3AutoConfiguration

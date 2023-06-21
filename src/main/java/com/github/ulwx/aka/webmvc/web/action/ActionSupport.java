@@ -20,20 +20,19 @@ public  class ActionSupport {
 	private static Logger logger = LoggerFactory.getLogger(ActionSupport.class);
 
 	protected BeanGet beanGet;
-	private String next;
 
 	//全局预定义逻辑视图名称
 	public static final String JSON = "json";
-	public  static  final String OK = "ok";
-	public  static  final String SUCCESS = "success";
-	public  static  final String MAIN = "main";
-	public  static  final String NEXT = "next";
 	public  static  final String FORWARD = "forward";
 	public  static  final String REDIRECT = "redirect";
 	public  static  final String DOWNLOAD = "download";
 	public  static  final String ERROR = "error";
 	public  static  final String MESSAGE = "message";
 	public static final String GATE="gate";
+
+	public  static  final String _OK = "ok";
+	public  static  final String _SUCCESS = "success";
+	public  static  final String _MAIN = "main";
 
 	public  static  final String LOGIN="login";
 
@@ -65,9 +64,6 @@ public  class ActionSupport {
 		return   this.getSession().getAttribute(WebMvcCbConstants.USER);
 	}
 
-	public void setNext(String next) {
-		this.next = next;
-	}
 
 	/**
 	 * 获取HttpServletResponse对象
@@ -124,19 +120,20 @@ public  class ActionSupport {
 
 	}
 
-	public String getNext() {
-		return next;
-	}
 
-	public String NEXT(String next){
-		this.next=next;
-		return NEXT;
-	}
-
-	private    CbResultJson buildResult(int status,int errorCode,Result result,String message){
-		CbResultJson rj=result.getResult(status,errorCode,message);
-		ActionContext  ctx = ActionContext.getContext();
-		ctx.put(WebMvcCbConstants.ResultKey,rj);
+	private CbResult buildResult(int status, int errorCode, Object result, String message){
+		CbResult rj=null;
+		if(result instanceof Result) {
+			rj = ((Result)result).getResult(status, errorCode, message);
+		}else{
+			rj=new CbResult();
+			rj.setStatus(status);
+			rj.setData(result);
+			rj.setError(errorCode);
+			rj.setMessage(message);
+		}
+		ActionContext ctx = ActionContext.getContext();
+		ctx.put(WebMvcCbConstants.ResultKey, rj);
 		return rj;
 
 	}
@@ -156,23 +153,14 @@ public  class ActionSupport {
 		return MESSAGE;
 	}
 	public  String JsonViewSuc(String message, Object data){
-		CbResultJson rj=new CbResultJson();
-		rj.setStatus(Status.SUC);
-		rj.setData(data);
-		rj.setError(0);
-		rj.setMessage(message);
-		ActionContext  ctx = ActionContext.getContext();
-		String ret= ObjectUtils.toJsonString(rj);
-		JsonResult jsonResult=new JsonResult();
-		jsonResult.setContent(ret, this.getRequestUtils().getString("callback"));
-		this.buildResult(Status.SUC,0,jsonResult,message);
+
+		this.buildResult(Status.SUC,0,data,message);
 		return JSON;
 
 	}
 	public  String JsonViewSuc(){
 		return JsonViewSuc("成功",null);
 	}
-
 	public  String JsonViewSuc(Object data){
 		if(data instanceof String){
 			return JsonViewSuc(data.toString(),data);
@@ -181,58 +169,45 @@ public  class ActionSupport {
 	}
 
 	public  String JsonViewError(String message){
-
-		CbResultJson rj=new CbResultJson();
-		rj.setStatus(Status.ERR);
-		rj.setMessage(message);
-		rj.setError(ErrorCode.COMMON_ERROR);
-		String ret=ObjectUtils.toJsonString2(rj,true,true);
-
-		JsonResult jsonResult=new JsonResult();
-		jsonResult.setContent(ret, this.getRequestUtils().getString("callback"));
-		this.buildResult(Status.ERR,0,jsonResult,message);
+		this.buildResult(Status.ERR,0,null,message);
 		return JSON;
 	}
 
-	public CbResultJson getResult(String view){
+	public CbResult getResult(String view){
+		if(view==null) return null;
 		ActionContext  ctx = ActionContext.getContext();
-		return (CbResultJson)ctx.get(WebMvcCbConstants.ResultKey);
+		return (CbResult)ctx.get(WebMvcCbConstants.ResultKey);
+
+	}
+	public CbResult result(String view){
+		return getResult(view);
 
 	}
 	public  String JsonViewError(Integer errorCode, String message){
 
-		CbResultJson rj=new CbResultJson();
-		rj.setStatus(Status.ERR);
-		rj.setData(null);
-		rj.setMessage(message);
-		rj.setError(errorCode);
-		String ret=ObjectUtils.toJsonString2(rj,true,true);
-		JsonResult jsonResult=new JsonResult();
-		jsonResult.setContent(ret, this.getRequestUtils().getString("callback"));
-		this.buildResult(Status.ERR,0,jsonResult,message);
+		this.buildResult(Status.ERR,errorCode,null,message);
 		return JSON;
 	}
 	public  String JsonViewError(Integer errorCode){
-
-		CbResultJson rj=new CbResultJson();
-		rj.setStatus(Status.ERR);
-		rj.setData(null);
-		rj.setMessage(ErrorCode.errors.get(errorCode));
-		rj.setError(errorCode);
-		String ret=ObjectUtils.toJsonString2(rj,true,true);
-		JsonResult jsonResult=new JsonResult();
-		jsonResult.setContent(ret, this.getRequestUtils().getString("callback"));
-		this.buildResult(Status.ERR,0,jsonResult,rj.getMessage());
+		this.buildResult(Status.ERR,errorCode,null,ErrorCode.errors.get(errorCode));
 		return JSON;
 
 	}
 	public String ForwardView(String url){
-		ForwardReulst forwardReulst=new ForwardReulst();
+		ForwardResult forwardReulst=new ForwardResult();
 		forwardReulst.setForwardURL(url);
 		this.buildResult(Status.SUC,0,forwardReulst,"成功！");
 		return FORWARD;
 	}
 
+	public String RedirectView(String url, Object Data){
+
+		RedirectResult redirectResult=new RedirectResult();
+		redirectResult.setRedirectURL(url);
+		redirectResult.setData(Data);
+		this.buildResult(Status.SUC,0,redirectResult,"成功！");
+		return REDIRECT;
+	}
 	public String RedirectView(String url){
 
 		RedirectResult redirectResult=new RedirectResult();
@@ -240,10 +215,9 @@ public  class ActionSupport {
 		this.buildResult(Status.SUC,0,redirectResult,"成功！");
 		return REDIRECT;
 	}
-
 	public String DownloadView(File file,String fileName){
 
-		DownLoadReulst downLoadReulst=new DownLoadReulst();
+		DownLoadResult downLoadReulst=new DownLoadResult();
 		downLoadReulst.setFile(file);
 		downLoadReulst.setFileName(fileName);
 		this.buildResult(Status.SUC,0,downLoadReulst,"成功！");

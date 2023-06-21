@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
-@Controller
+@Controller("com.github.ulwx.aka.webmvc.BaseErrController")
 @RequestMapping("${server.error.path:${error.path:/error}}")
 public class BaseErrController implements ErrorController {
     private static Logger log = Logger.getLogger(BaseErrController.class);
@@ -38,7 +38,9 @@ public class BaseErrController implements ErrorController {
         message=message+";";
         ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
         PrintWriter printWriter=new PrintWriter(byteArrayOutputStream,true);
-        exception.printStackTrace(printWriter);
+        if(exception!=null) {
+            exception.printStackTrace(printWriter);
+        }
         try {
             exceptionStr=byteArrayOutputStream.toString("utf-8");
         }catch (Exception e){
@@ -71,19 +73,16 @@ public class BaseErrController implements ErrorController {
             if(strs!=null && strs.length==1){
                 callBack=strs[0];
             }
-            JsonResult jsonResult= new JsonResult();
-            CbResultJson content=CbResultJson.of(Status.ERR,0,
+            ActionContext.getContext().getRequestUtils(request).setString("callback",callBack);
+            CbResult ret= CbResult.of(Status.ERR,0,
                     message + "【" + statusCode + "】", null);
-            jsonResult.setContent(content,callBack);
-            CbResultJson ret=CbResultJson.of(Status.ERR,0,
-                    message + "【" + statusCode + "】", jsonResult);
             modelAndView.addObject(WebMvcCbConstants.ResultKey, ret);
             modelAndView.setViewName(jsonView);
         } else {
             MsgResult msgResult=new MsgResult();
             msgResult.setMsg(message + "【" + statusCode + "】");
             //msgResult.setReturnURL(errerSourceUrl);
-            CbResultJson<MsgResult> ret=CbResultJson.of(Status.ERR,0,
+            CbResult<MsgResult> ret= CbResult.of(Status.ERR,0,
                     message + "【" + statusCode + "】", msgResult);
             modelAndView.addObject(WebMvcCbConstants.ResultKey, ret);
             modelAndView.setViewName(messageView);

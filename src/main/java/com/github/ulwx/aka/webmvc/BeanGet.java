@@ -13,7 +13,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
-@Component
+@Component("com.github.ulwx.aka.webmvc.BeanGet")
 public class BeanGet implements ApplicationContextAware {
     private  static Logger logger = Logger.getLogger(BeanGet.class);
     private  static volatile ApplicationContext applicationContext;
@@ -46,19 +46,10 @@ public class BeanGet implements ApplicationContextAware {
         return applicationContext;
     }
 
-    public static   <T> T getBean(Class<T> beanClass){
-        try {
-            return (T)applicationContext.getBean(beanClass);
-        } catch (NoSuchBeanDefinitionException e) {
-            logger.debug(beanClass+" type of bean not exists in context! return null");
-            return null;
-        }catch(Exception ex){
-            throw new ServiceException(ex);
-        }
-    }
+
     public   <T> T bean(Class<T> beanClass){
         try {
-            return (T)applicationContext.getBean(beanClass);
+            return (T)getApplicationContext().getBean(beanClass);
         } catch (NoSuchBeanDefinitionException e) {
             logger.error(e+"",e);
             return null;
@@ -67,51 +58,49 @@ public class BeanGet implements ApplicationContextAware {
             throw new ServiceException(ex);
         }
     }
-    public static   <T> Map<String, T> getBeans(Class<T> beanClass){
-        try {
-            return applicationContext.getBeansOfType(beanClass);
-        } catch (NoSuchBeanDefinitionException e) {
-            logger.debug(beanClass+" type of bean not exists in context! return null");
-            return null;
-        }catch(Exception ex){
-            throw new ServiceException(ex);
-        }
-    }
+
     public   <T> Map<String, T> beans(Class<T> beanClass){
         try {
-            return applicationContext.getBeansOfType(beanClass);
+            return getApplicationContext().getBeansOfType(beanClass);
         } catch (NoSuchBeanDefinitionException e) {
             logger.debug(beanClass+" type of bean not exists in context! return null");
             return null;
         }catch(Exception ex){
             throw new ServiceException(ex);
-        }
-    }
-    public  <T> T bean(Class<T> beanClass,String name){
-        try {
-            return (T)applicationContext.getBean(name,beanClass);
-        } catch (NoSuchBeanDefinitionException e) {
-            logger.debug(name+" bean not exists in context! return null");
-            return null;
-        }catch(Exception ex){
-            throw new ServiceException(ex);
-
-        }
-    }
-    public static  <T> T getBean(Class<T> beanClass,String name){
-        try {
-            return (T)applicationContext.getBean(name,beanClass);
-        } catch (NoSuchBeanDefinitionException e) {
-            logger.debug(name+" bean not exists in context! return null");
-            return null;
-        }catch(Exception ex){
-            throw new ServiceException(ex);
-
         }
     }
     public  <T>  T bean(Class<T> beanClass, HttpServletRequest hreq){
         return bean(beanClass,hreq.getServletContext());
     }
+    public  <T> T bean(Class<T> beanClass,String name){
+        try {
+            return (T)getApplicationContext().getBean(name,beanClass);
+        } catch (NoSuchBeanDefinitionException e) {
+            logger.debug(name+" bean not exists in context! return null");
+            return null;
+        }catch(Exception ex){
+            throw new ServiceException(ex);
+
+        }
+    }
+    public  <T>  T bean(Class<T> beanClass, ServletContext context){
+        ApplicationContext ac = WebApplicationContextUtils.getWebApplicationContext(context);
+        T userService= (T)ac.getBean(beanClass);
+        return userService;
+
+    }
+    public static  <T> T getBean(Class<T> beanClass,String name){
+        try {
+            return (T)getApplicationContext().getBean(name,beanClass);
+        } catch (NoSuchBeanDefinitionException e) {
+            logger.debug(name+" bean not exists in context! return null");
+            return null;
+        }catch(Exception ex){
+            throw new ServiceException(ex);
+
+        }
+    }
+
     public static  <T>  T getBean(Class<T> beanClass, HttpServletRequest hreq){
         return getBean(beanClass,hreq.getServletContext());
     }
@@ -121,12 +110,49 @@ public class BeanGet implements ApplicationContextAware {
         return userService;
 
     }
-    public  <T>  T bean(Class<T> beanClass, ServletContext context){
-        ApplicationContext ac = WebApplicationContextUtils.getWebApplicationContext(context);
-        T userService= (T)ac.getBean(beanClass);
-        return userService;
 
+
+    public static   <T> T getBean(Class<T> beanClass){
+        try {
+            return (T)getApplicationContext().getBean(beanClass);
+        } catch (NoSuchBeanDefinitionException e) {
+            logger.debug(beanClass+" type of bean not exists in context! return null");
+            return null;
+        }catch(Exception ex){
+            throw new ServiceException(ex);
+        }
+    }
+    public static   <T> Map<String, T> getBeans(Class<T> beanClass){
+        try {
+            return getApplicationContext().getBeansOfType(beanClass);
+        } catch (NoSuchBeanDefinitionException e) {
+            logger.debug(beanClass+" type of bean not exists in context! return null");
+            return null;
+        }catch(Exception ex){
+            throw new ServiceException(ex);
+        }
+    }
+    public static   <T> Map<String, T> getBeans(Class<T> beanClass, ServletContext context){
+        try {
+            ApplicationContext ac = WebApplicationContextUtils.getWebApplicationContext(context);
+            return ac.getBeansOfType(beanClass);
+        } catch (NoSuchBeanDefinitionException e) {
+            logger.debug(beanClass+" type of bean not exists in context! return null");
+            return null;
+        }catch(Exception ex){
+            throw new ServiceException(ex);
+        }
     }
 
-
+    public static   <T> Map<String, T> getBeans(Class<T> beanClass, HttpServletRequest hreq){
+        try {
+            ApplicationContext ac = WebApplicationContextUtils.getWebApplicationContext(hreq.getServletContext());
+            return ac.getBeansOfType(beanClass);
+        } catch (NoSuchBeanDefinitionException e) {
+            logger.debug(beanClass+" type of bean not exists in context! return null");
+            return null;
+        }catch(Exception ex){
+            throw new ServiceException(ex);
+        }
+    }
 }

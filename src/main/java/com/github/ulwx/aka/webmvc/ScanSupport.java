@@ -16,7 +16,7 @@ import org.springframework.util.SystemPropertyUtils;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-@Component
+@Component("com.github.ulwx.aka.webmvc.ScanSupport")
 public class ScanSupport  {
     private  static Logger log = Logger.getLogger(ScanSupport.class);
     public  static ScanSupport instance=new ScanSupport();

@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Properties;
 
-@Configuration(AkaConst.WebContextConfigName)
+@Configuration("com.github.ulwx.aka.webmvc.WebContextConfiguration")
 @EnableTransactionManagement(proxyTargetClass = true)
 @ServletComponentScan(AkaConst.WebMvcComponetPackage)
 @ConfigurationPropertiesScan({AkaConst.WebMvcComponetPackage})
@@ -66,20 +66,16 @@ public class WebContextConfiguration implements WebMvcConfigurer {
 
                 ModelAndView modelAndView= super.doResolveException(request, response, handler, ex);
                 if(modelAndView!=null){
-                    CbResultJson content=CbResultJson.of(Status.ERR,0,
-                            ex.getMessage(), null);
                     if(ex instanceof JspServiceException){
                         MsgResult msgResult=new MsgResult();
                         msgResult.setMsg( ex.getMessage());
                         msgResult.setReturnURL("");
-                        CbResultJson ret=CbResultJson.of(Status.ERR,0, ex.getMessage(), msgResult);
+                        CbResult ret= CbResult.of(Status.ERR,0, ex.getMessage(), msgResult);
                         modelAndView.addObject(WebMvcCbConstants.ResultKey, ret);
                     }else if(ex instanceof JsonServiceException){
-                        //modelAndView.addObject(WebMvcCbConstants.SessionKey.JsonViewKey, CbResultJson.ERR(ex, "异常"));
-                        JsonResult jsonResult= new JsonResult();
                         String callBack=request.getParameter("callback");
-                        jsonResult.setContent(content,callBack);
-                        CbResultJson ret=CbResultJson.of(Status.ERR,0, ex.getMessage(),jsonResult);
+                        ActionContext.getContext().getRequestUtils(request).setString("callback",callBack);
+                        CbResult ret= CbResult.of(Status.ERR,0, ex.getMessage(),null);
                         modelAndView.addObject(WebMvcCbConstants.ResultKey, ret);
                     }
                 }

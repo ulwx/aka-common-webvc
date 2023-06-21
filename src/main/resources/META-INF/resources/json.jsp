@@ -1,19 +1,24 @@
 <%@ page import="com.github.ulwx.aka.webmvc.WebMvcCbConstants" %>
 <%@ page import="com.github.ulwx.aka.webmvc.web.action.JsonResult"%>
-<%@ page import="com.github.ulwx.aka.webmvc.web.action.CbResultJson"%>
+<%@ page import="com.github.ulwx.aka.webmvc.web.action.CbResult"%><%@ page import="com.ulwx.tool.ObjectUtils"%><%@ page import="com.github.ulwx.aka.webmvc.web.action.ActionContext"%><%@ page import="com.ulwx.tool.StringUtils"%>
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@ page contentType="application/json; charset=utf-8" language="java"
          errorPage=""%>
 <%
 	try
 	{
-        CbResultJson resultJson=(CbResultJson)request.getAttribute(WebMvcCbConstants.ResultKey);
-		JsonResult result = (JsonResult)resultJson.getData();
-        out.write(result.getContent());
+        CbResult resultJson=(CbResult)request.getAttribute(WebMvcCbConstants.ResultKey);
+        String str=ObjectUtils.toStringUseFastJson(resultJson,false);
+        String callback=ActionContext.getContext().getRequestUtils(request).getString("callback");
+        if (StringUtils.hasText(callback)) {
+            str = callback + "(" + str + ")";
+
+        }
+        out.write(str);
+        out.flush();
 	}
 	catch (Exception e)
 	{
-		//JspLog.error("",e);
 
 	}
 %>
