@@ -4,6 +4,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class CbResult<T> {
 
+    @Schema( description = "请求id，全局唯一")
+    private String requestId;
+    @Schema( description = "时间戳")
+    private String timestamp;
+    @Schema( description = "对应的请求路径")
+    private String path;
     //"状态，200表示成功， -100表示失败
     @Schema(name = "status", description = "状态码,1表示成功， 0表示失败")
     private Integer status = Status.SUC;
@@ -18,6 +24,30 @@ public class CbResult<T> {
     private String src = "";
     @Schema(name = "data", description = "承载的数据")
     private T data;
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
 
     public Integer getStatus() {
         return status;

@@ -6,9 +6,9 @@
 	<version>2.0-SNAPSHOT</version>
 	<parent>
 		<groupId>com.github.ulwx</groupId>
-		<artifactId>aka-common-cloud-parent</artifactId>
+		<artifactId>aka-common-parent</artifactId>
 		<version>2.0-SNAPSHOT</version>
-		<relativePath>../aka-common-cloud-parent/pom.xml</relativePath>
+		<relativePath>../aka-common-parent/pom.xml</relativePath>
 	</parent>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -34,7 +34,6 @@
 	</build>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -53,26 +52,19 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aspects</artifactId>
-			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ulwx</groupId>
 			<artifactId>aka-dbutils-spring-boot-starter</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>com.github.xiaoymin</groupId>-->
-<!--			<artifactId>knife4j-openapi3-spring-boot-starter</artifactId>-->
-<!--			<version>4.1.0</version>-->
-<!--		</dependency>-->
+
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
-			<version>6.1.3.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ulwx</groupId>
@@ -89,6 +81,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+<!--			<version>4.5.7</version>-->
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -115,7 +112,6 @@
 		<dependency>
 			<groupId>org.apache.shardingsphere</groupId>
 			<artifactId>shardingsphere-jdbc-core</artifactId>
-			<version>5.3.1</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>log4j</artifactId>

@@ -6,12 +6,12 @@ import java.util.Map;
 public class ErrorCode {
     public static final int NO_ERROR = 0;
     public static final int COMMON_ERROR = 999;
-    public static Integer TWO_INPUT_PASS_NOT_MATCH=1000;
+    public static final int VIEW_ERROR = 998;
     public static Map<Integer,String> errors=new HashMap<Integer,String>();
 
     static{
-        errors.put(TWO_INPUT_PASS_NOT_MATCH, "两次输入密码不匹配！");
-        errors.put(COMMON_ERROR, "");
+        errors.put(COMMON_ERROR, "返回视图出错！");
+        errors.put(VIEW_ERROR, "");
     }
 
     public Map<Integer, String> getError() {

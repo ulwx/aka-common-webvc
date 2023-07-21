@@ -48,7 +48,6 @@ public class BaseController implements ApplicationContextAware {
         this.akaWebMvcProperties = akaWebMvcProperties;
     }
 
-
     public List<RequestProcessor> getRequestProcessors() {
         return requestProcessors;
     }
@@ -71,9 +70,7 @@ public class BaseController implements ApplicationContextAware {
         public static String ModClassMethodName = "mod-class-method-name";
         public static String AllowMethods = "allow-methods";
 
-
     }
-
     public static Map<String, String> getViewMap(NameSpace nameSpace, String logicActionName) {
         Map<String, Map<String, String>> map = nameSpace.getUrlMaps();
         Map<String, String> vewMap = map.get(logicActionName);
@@ -101,45 +98,38 @@ public class BaseController implements ApplicationContextAware {
     private String onBefore(HttpServletRequest request, ActionMethodInfo actionMethodInfo, RequestUtils context) {
         for (int i = 0; i < requestProcessors.size(); i++) {
             RequestProcessor requestProcessor = requestProcessors.get(i);
-            String ret = requestProcessor.onBefore(request, actionMethodInfo, context);
-            if (ret != null) return ret;
+            String view=requestProcessor.onBefore(request, actionMethodInfo, context);
+            if(view!=null) return view;
 
         }
         return null;
+
     }
 
-    private String onAfter(HttpServletRequest request, ActionMethodInfo actionMethodInfo,
+    private void onAfter(HttpServletRequest request, ActionMethodInfo actionMethodInfo,
                            RequestUtils context, String result) {
         for (int i = 0; i < requestProcessors.size(); i++) {
             RequestProcessor requestProcessor = requestProcessors.get(i);
-            String ret = requestProcessor.onAfter(request, actionMethodInfo, context, result);
-            if (ret != null) return ret;
-
+             requestProcessor.onAfter(request, actionMethodInfo, context, result);
         }
-        return null;
     }
 
-    private String onExcepton(HttpServletRequest request, ActionMethodInfo actionMethodInfo,
+    private void onExcepton(HttpServletRequest request, ActionMethodInfo actionMethodInfo,
                               RequestUtils context,
                               Exception e,ProcessorStatus status) {
         for (int i = 0; i < requestProcessors.size(); i++) {
             RequestProcessor requestProcessor = requestProcessors.get(i);
-            String ret = requestProcessor.onException(request, actionMethodInfo, context,e,status);
-            if (ret != null) return ret;
-
+            requestProcessor.onException(request, actionMethodInfo, context,e,status);
         }
-        return null;
     }
 
     private void onFinished(HttpServletRequest request, ActionMethodInfo actionMethodInfo,
                               RequestUtils context, String result,Exception e,ProcessorStatus status) {
         for (int i = 0; i < requestProcessors.size(); i++) {
             RequestProcessor requestProcessor = requestProcessors.get(i);
-            boolean ret = requestProcessor.onFinished(request, actionMethodInfo, context, result,e,status);
-            if (!ret) return ;
+            requestProcessor.onFinished(request, actionMethodInfo, context, result,e,status);
 
         }
-        return ;
     }
 
     public static boolean checkMethod(Method method){
@@ -158,7 +148,7 @@ public class BaseController implements ApplicationContextAware {
         }
         return true;
     }
-    private String run(ActionMethodInfo actionMethodInfo,
+    private String run(boolean isJSONResponse,ActionMethodInfo actionMethodInfo,
                        HttpServletRequest request) throws Exception {
         RequestUtils requestUtils = ActionContext.getContext().getRequestUtils(request);
         ActionContext.getContext().put(WebMvcActiionContextConst.ActionMethodInfo,actionMethodInfo);
@@ -167,93 +157,100 @@ public class BaseController implements ApplicationContextAware {
         String viewName="";
         Exception exception=null;
         ProcessorStatus processorStatus=null;
+        Object argObj=null;
         try {
             processorStatus = ProcessorStatus.Start;
-            String beforeRet = this.onBefore(request, actionMethodInfo, requestUtils);
-            processorStatus=ProcessorStatus.OnBeforeComplete;
-            if(beforeRet!=null){
-                viewName=beforeRet;
-
-            }else{
-                Method method=actionMethodInfo.getAnnoClassMethodInfo().getMethod();
-                boolean checked=checkMethod(method);
-                if(!checked){
-                    throw new ServiceException(method+"方法不满足执行条件!");
+            String beforeView=this.onBefore(request, actionMethodInfo, requestUtils);
+            if(beforeView==null) {
+                processorStatus = ProcessorStatus.OnBeforeComplete;
+                Method method = actionMethodInfo.getAnnoClassMethodInfo().getMethod();
+                boolean checked = checkMethod(method);
+                if (!checked) {
+                    throw new ServiceException(method + "方法不满足执行条件!");
                 }
-                //Type returnType=method.getGenericReturnType();
-                Type[] parmaterTypes=method.getGenericParameterTypes();
-                Object argObj=null;
-                boolean hasParam=false;
-                if(parmaterTypes !=null){
-                    if(parmaterTypes.length>1) throw new ServiceException("请求的参数的个数不能大于1个！");
-                    if(parmaterTypes.length==1){
-                        if(parmaterTypes[0] instanceof ParameterizedType){
+                Type[] parmaterTypes = method.getGenericParameterTypes();
+
+                boolean hasParam = false;
+                if (parmaterTypes != null) {
+                    if (parmaterTypes.length > 1) throw new ServiceException("请求的参数的个数不能大于1个！");
+                    if (parmaterTypes.length == 1) {
+                        if (parmaterTypes[0] instanceof ParameterizedType) {
                             ParameterizedType pType = (ParameterizedType) parmaterTypes[0];
                             argObj = requestUtils.getBody(pType);
-                        }else {
-                            if(parmaterTypes[0] instanceof Class) {
+                        } else {
+                            if (parmaterTypes[0] instanceof Class) {
                                 Class clazz = (Class) parmaterTypes[0];
                                 argObj = ObjectUtils.fromMapToJavaBean(clazz.newInstance(), requestUtils.getrParms());
-                            }else{
-                                throw new RuntimeException("不支持请求参数为"+parmaterTypes[0]+"类型！");
+                            } else {
+                                throw new RuntimeException("不支持请求参数为" + parmaterTypes[0] + "类型！");
                             }
                         }
                         hasParam = true;
                     }
 
                 }
-                if(hasParam) {
-                    ret = method.invoke(cba,argObj);
-                }else{
+                if (hasParam) {
+                    ret = method.invoke(cba, argObj);
+                } else {
                     ret = method.invoke(cba);
                 }
-                if(ret!=null){
-                    if(ret instanceof CbResult){
-                        Object dataResult=((CbResult<?>) ret).getData();
-                        request.setAttribute(WebMvcCbConstants.ResultKey, ret );
-                        if(dataResult instanceof Result) {
-                            viewName =( (Result)dataResult).getType().toString();
-                        }else{ //json
-                            viewName=ResultType.json.toString();
+                if (ret == null) {
+                    viewName = ResultType.json.toString();
+                    CbResult cbResult = new CbResult();
+                    cbResult.setError(ErrorCode.VIEW_ERROR);
+                    cbResult.setStatus(Status.ERR);
+                    request.setAttribute(WebMvcCbConstants.ResultKey, cbResult);
+                } else {
+                    if (ret instanceof CbResult) {
+                        Object dataResult = ((CbResult<?>) ret).getData();
+                        request.setAttribute(WebMvcCbConstants.ResultKey, ret);
+                        if (dataResult instanceof Result) {
+                            viewName = ((Result) dataResult).getType().toString();
+                        } else { //json
+                            viewName = ResultType.json.toString();
                         }
 
-                    }else if(ret instanceof  String){
-                        viewName=ret.toString();
-                    }else{
-                        viewName=ResultType.json.toString();
-                        CbResult cbResult=new CbResult();
+                    } else if (ret instanceof String) {
+                        viewName = ret.toString();
+                    } else {
+                        viewName = ResultType.json.toString();
+                        CbResult cbResult = new CbResult();
                         cbResult.setData(ret);
-                        request.setAttribute(WebMvcCbConstants.ResultKey, ret );
+                        request.setAttribute(WebMvcCbConstants.ResultKey, cbResult);
                     }
                 }
-                processorStatus = ProcessorStatus.ActionComplete;
-                String afterRet = this.onAfter(request, actionMethodInfo, requestUtils, viewName);
-                processorStatus = ProcessorStatus.OnAfterComplete;
-                if (afterRet != null) {
-                    viewName=afterRet;
-                }
 
+            }else{
+                viewName=beforeView;
             }
 
+            //添加requestid，时间戳，path等
+            if (argObj != null && argObj instanceof CbRequest) {
+                CbRequest cbRequest = (CbRequest) argObj;
+                CbResult resultTemp = (CbResult) request.getAttribute(WebMvcCbConstants.ResultKey);
+                resultTemp.setRequestId(cbRequest.getRequestId());
+                resultTemp.setTimestamp(CTime.formatLocalDateTime());
+                resultTemp.setPath(request.getRequestURI().toString());
+            }
+
+            processorStatus = ProcessorStatus.onActionComplete;
+            this.onAfter(request, actionMethodInfo, requestUtils, viewName);
+            processorStatus = ProcessorStatus.OnAfterComplete;
 
         } catch (Exception e) {
-            String exceptonRet=null;
             log.error(e+",exeStatus="+processorStatus+",ret="+ret,e);
             exception=e;
             try {
-                exceptonRet= this.onExcepton(request, actionMethodInfo, requestUtils, exception,processorStatus);
+                this.onExcepton(request, actionMethodInfo, requestUtils, exception,processorStatus);
                 processorStatus = ProcessorStatus.OnExceptionComplete;
-                if (exceptonRet != null) {
-                    viewName = exceptonRet;
 
-                }
             }catch (Exception ex){
                 exception.addSuppressed(ex);
                 log.error(ex+"",exception);
                 processorStatus = ProcessorStatus.OnExceptionHasError;
             }finally {
                 if(StringUtils.isEmpty(viewName)) {
-                    throw new ServiceException(exception);
+                    viewName= this.handException(isJSONResponse,request,exception);
                 }
             }
 
@@ -411,6 +408,8 @@ public class BaseController implements ApplicationContextAware {
     public String HandleRequest(HttpServletRequest request, @PathVariable String namespace,
                                 @PathVariable String logicActionMethodName) throws Exception {
 
+        ActionContext.getContext()
+                .getRequestUtils(request);
         if (log.isDebugEnabled()) {
             log.debug("request URL:" + request.getRequestURL());
             log.debug("request parmaters:" + ObjectUtils.toString(ActionContext.getContext()
@@ -420,7 +419,7 @@ public class BaseController implements ApplicationContextAware {
         if (namespace == null || namespace.isEmpty()) {
             throw new ServiceException("url里没有命名空间！");
         }
-        String url = request.getRequestURL().toString();
+        //String url = request.getRequestURL().toString();
         namespace = namespace.trim();
         boolean isJSONResponse = false;
         try {
@@ -446,7 +445,7 @@ public class BaseController implements ApplicationContextAware {
             actionMethodInfo.setAnnoClassMethodInfo(annoClassMethodInfo);
             actionMethodInfo.setJSONResponse(isJSONResponse);
             //运行处理方法
-            String viewName = this.run(actionMethodInfo, request);
+            String viewName = this.run(isJSONResponse,actionMethodInfo, request);
             ActionSupport cba = actionMethodInfo.getActionObj();
             if (viewName != null ) {
                 if (viewName.equals("json")) {
@@ -496,28 +495,37 @@ public class BaseController implements ApplicationContextAware {
             return finalViewURL;
 
         } catch (Exception ex) {
-            log.error(ex + "", ex);
-            Exception targetException = null;
-            if (ex instanceof InvocationTargetException) {
-                InvocationTargetException itException = (InvocationTargetException) ex;
-                targetException = (Exception) itException.getCause();
-            } else {
-                targetException = ex;
-            }
-            ServiceException sex = null;
-            if (targetException instanceof ServiceException) {
-                sex = (ServiceException) targetException;
-            } else {
-                sex = new ServiceException(targetException);
-            }
-            if (isJSONResponse) {
-                throw new JsonServiceException(sex);
-            } else {
-                throw new JspServiceException(sex);
-            }
+            return this.handException(isJSONResponse,request,ex);
+
         }
     }
 
+    private String handException(boolean isJSONResponse,HttpServletRequest request,Exception ex){
+        log.error(ex + "", ex);
+        Exception targetException = null;
+        if (ex instanceof InvocationTargetException) {
+            InvocationTargetException itException = (InvocationTargetException) ex;
+            targetException = (Exception) itException.getCause();
+        } else {
+            targetException = ex;
+        }
+        if (isJSONResponse) {
+            String callBack=request.getParameter("callback");
+            ActionContext.getContext().getRequestUtils(request).setString("callback",callBack);
+            CbResult ret= CbResult.of(Status.ERR,0, targetException+"",null);
+            ActionContext ctx = ActionContext.getContext();
+            ctx.put(WebMvcCbConstants.ResultKey, ret);
+            return ActionSupport.JSON;
+        } else {
+            MsgResult msgResult=new MsgResult();
+            msgResult.setMsg( ex.getMessage());
+            msgResult.setReturnURL("");
+            CbResult ret= CbResult.of(Status.ERR,0, targetException+"", msgResult);
+            ActionContext ctx = ActionContext.getContext();
+            ctx.put(WebMvcCbConstants.ResultKey, ret);
+            return ActionSupport.MESSAGE;
+        }
+    }
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;

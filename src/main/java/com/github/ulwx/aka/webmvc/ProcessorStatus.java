@@ -4,7 +4,7 @@ package com.github.ulwx.aka.webmvc;
 public enum ProcessorStatus {
     Start(0),
     OnBeforeComplete(1),
-    ActionComplete(2),
+    onActionComplete(2),
     OnAfterComplete(3),
     OnExceptionComplete(4),
     //处理异常时出现错误

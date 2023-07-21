@@ -3,8 +3,11 @@ package com.github.ulwx.aka.webmvc.web.action;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class CbRequest<T> {
-
-	//"状态，200表示成功， -100表示失败
+		@Schema( description = "请求id，全局唯一")
+		private String requestId;
+		@Schema( description = "时间戳")
+		private String timestamp;
+		//"状态，200表示成功， -100表示失败
 		@Schema(name = "status", description = "状态码,1表示成功， 0表示失败")
 		private Integer status= Status.SUC;
 		//"错误码，只有status=-100时，error才有意义
@@ -18,7 +21,23 @@ public class CbRequest<T> {
 		@Schema(name = "data", description = "承载的数据")
 		private T data;
 
-		public Integer getStatus() {
+	public String getRequestId() {
+		return requestId;
+	}
+
+	public void setRequestId(String requestId) {
+		this.requestId = requestId;
+	}
+
+	public String getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(String timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public Integer getStatus() {
 			return status;
 		}
 		public void setStatus(Integer status) {
