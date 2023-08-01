@@ -136,12 +136,6 @@ public class BaseController implements ApplicationContextAware {
         if(method.getParameterTypes()!=null && method.getParameterTypes().length>1){
             return false;
         }
-//        if(method.getParameterTypes().length==1){
-//            Class pType=method.getParameterTypes()[0];
-//            if(!CbRequestJson.class.isAssignableFrom(pType)){
-//                return false;
-//            }
-//        }
         if(method.getReturnType()!=String.class
                 &&  !CbResult.class.isAssignableFrom(method.getReturnType())){
             return false;
@@ -176,7 +170,15 @@ public class BaseController implements ApplicationContextAware {
                     if (parmaterTypes.length == 1) {
                         if (parmaterTypes[0] instanceof ParameterizedType) {
                             ParameterizedType pType = (ParameterizedType) parmaterTypes[0];
+                            Class<?> clazz=(Class<?>)pType.getRawType();
                             argObj = requestUtils.getBody(pType);
+                            if(argObj instanceof CbRequest){
+                                CbRequest cbRequest= (CbRequest)argObj;
+                                if(cbRequest.getRequestId()==null ||
+                                        cbRequest.getRequestId().trim().isEmpty()){
+                                    throw new RuntimeException("请求里requestId必须设置！");
+                                }
+                            }
                         } else {
                             if (parmaterTypes[0] instanceof Class) {
                                 Class clazz = (Class) parmaterTypes[0];
@@ -203,6 +205,13 @@ public class BaseController implements ApplicationContextAware {
                 } else {
                     if (ret instanceof CbResult) {
                         Object dataResult = ((CbResult<?>) ret).getData();
+                        if(argObj instanceof CbRequest){
+                            CbRequest cbRequest= (CbRequest)argObj;
+                            if(cbRequest.getRequestId()!=null &&
+                                   !cbRequest.getRequestId().trim().isEmpty()){
+                                ((CbResult<?>) ret).setRequestId(cbRequest.getRequestId());
+                            }
+                        }
                         request.setAttribute(WebMvcCbConstants.ResultKey, ret);
                         if (dataResult instanceof Result) {
                             viewName = ((Result) dataResult).getType().toString();

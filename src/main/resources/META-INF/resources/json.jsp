@@ -8,7 +8,7 @@
 	try
 	{
         CbResult resultJson=(CbResult)request.getAttribute(WebMvcCbConstants.ResultKey);
-        String str=ObjectUtils.toStringUseFastJson(resultJson,false);
+        String str=ObjectUtils.toStringUseFastJson(resultJson,true);
         String callback=ActionContext.getContext().getRequestUtils(request).getString("callback");
         if (StringUtils.hasText(callback)) {
             str = callback + "(" + str + ")";

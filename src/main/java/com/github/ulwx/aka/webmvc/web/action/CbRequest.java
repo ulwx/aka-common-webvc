@@ -3,23 +3,18 @@ package com.github.ulwx.aka.webmvc.web.action;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class CbRequest<T> {
-		@Schema( description = "请求id，全局唯一")
-		private String requestId;
-		@Schema( description = "时间戳")
-		private String timestamp;
-		//"状态，200表示成功， -100表示失败
-		@Schema(name = "status", description = "状态码,1表示成功， 0表示失败")
-		private Integer status= Status.SUC;
-		//"错误码，只有status=-100时，error才有意义
-		@Schema(name = "error", description = "错误码，只有status=-100时，error才有意义")
-		private Integer error= ErrorCode.NO_ERROR;
-		//承载的数据
-		//"提示性信息"
-		@Schema(name = "message", description = "提示性信息")
-		private String message="成功";
-
-		@Schema(name = "data", description = "承载的数据")
-		private T data;
+	@Schema( description = "请求id，全局唯一")
+	private String requestId;
+	@Schema( description = "时间戳")
+	private String timestamp;
+	@Schema(name = "status", description = "状态码,1表示成功， 0表示失败")
+	private Integer status= Status.SUC;
+	@Schema(name = "error", description = "错误码")
+	private Integer error= ErrorCode.NO_ERROR;
+	@Schema(name = "message", description = "提示性信息")
+	private String message="成功";
+	@Schema(name = "data", description = "承载的数据")
+	private T data;
 
 	public String getRequestId() {
 		return requestId;
@@ -63,14 +58,5 @@ public class CbRequest<T> {
 			this.message = message;
 		}
 
-		public static CbRequest of(int status , int errorCode, String message, Object data){
-			CbRequest resultJson=new CbRequest();
-			resultJson.status=status;
-			resultJson.error=errorCode;
-			resultJson.message=message;
-			resultJson.data=data;
-			return resultJson;
-
-		}
 
 }

@@ -1,23 +1,21 @@
 package com.github.ulwx.aka.webmvc.web.action;
 
+import com.ulwx.tool.CTime;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class CbResult<T> {
 
     @Schema( description = "请求id，全局唯一")
-    private String requestId;
+    private String requestId="";
     @Schema( description = "时间戳")
-    private String timestamp;
+    private String timestamp= CTime.formatWholeAllDate();
     @Schema( description = "对应的请求路径")
-    private String path;
+    private String path="";
     //"状态，200表示成功， -100表示失败
     @Schema(name = "status", description = "状态码,1表示成功， 0表示失败")
     private Integer status = Status.SUC;
-    //"错误码，只有status=-100时，error才有意义
     @Schema(name = "error", description = "错误码，只有status=-100时，error才有意义")
     private Integer error = ErrorCode.NO_ERROR;
-    //承载的数据
-    //"提示性信息"
     @Schema(name = "message", description = "提示性信息")
     private String message = "成功";
     @Schema(name = "src", description = "来源，由业务自定义")
