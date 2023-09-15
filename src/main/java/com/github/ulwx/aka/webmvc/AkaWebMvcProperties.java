@@ -15,7 +15,6 @@ public class AkaWebMvcProperties implements InitializingBean {
     @NestedConfigurationProperty
     private Map<String,String> globalViews=new HashMap<>();
     private String indexUrl;
-
     @NestedConfigurationProperty
     private DS dsConfig;
 
@@ -43,7 +42,6 @@ public class AkaWebMvcProperties implements InitializingBean {
         this.globalViews = globalViews;
     }
 
-
     public String getIndexUrl() {
         return indexUrl;
     }
@@ -51,7 +49,6 @@ public class AkaWebMvcProperties implements InitializingBean {
     public void setIndexUrl(String indexUrl) {
         this.indexUrl = indexUrl;
     }
-
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -92,48 +89,6 @@ public class AkaWebMvcProperties implements InitializingBean {
         }
     }
 
-    public static class DebugFilter{
-        private Boolean enable;
-        private String username;
-
-        public Boolean getEnable() {
-            return enable;
-        }
-
-        public void setEnable(Boolean enable) {
-            this.enable = enable;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-    }
-
-    public static class AccessFilter{
-        private List<String> accessPlugins=new ArrayList<>();
-        private LinkedHashSet notFilterUrls=new LinkedHashSet();
-
-        public List<String> getAccessPlugins() {
-            return accessPlugins;
-        }
-
-        public void setAccessPlugins(List<String> accessPlugins) {
-            this.accessPlugins = accessPlugins;
-        }
-
-        public LinkedHashSet getNotFilterUrls() {
-            return notFilterUrls;
-        }
-
-        public void setNotFilterUrls(LinkedHashSet notFilterUrls) {
-            this.notFilterUrls = notFilterUrls;
-        }
-    }
     public static class ServiceImpl{
         private String logService;
         private String userInfoService;
