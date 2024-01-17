@@ -39,7 +39,7 @@ public class AkaDaoDsAspect extends AkaAbsctractDataSourceAspect {
             "&& !@annotation(com.github.ulwx.aka.dbutils.spring.multids.AkaDS) && " +
             " !within(com.github.ulwx.aka.webmvc.AkaDaoSupport) " +
             "&& !@within(com.github.ulwx.aka.dbutils.spring.multids.AkaDS)")
-    @Override
+
     public void dsPointCut() {
 
     }

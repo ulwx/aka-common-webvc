@@ -48,7 +48,7 @@ public class WebContextConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-
+   //static-locations: classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/public/
         registry.addResourceHandler("/**")
                 .addResourceLocations("/","classpath:/META-INF/resources/","classpath:/static/",
                         "classpath:/resources/","classpath:/public/","classpath:/static/");
@@ -93,4 +93,7 @@ public class WebContextConfiguration implements WebMvcConfigurer {
         resolvers.add(0,simpleMappingExceptionResolver);
 
     }
+
+
+
 }
