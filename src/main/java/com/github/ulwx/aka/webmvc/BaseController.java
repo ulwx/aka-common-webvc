@@ -518,10 +518,11 @@ public class BaseController implements ApplicationContextAware {
         } else {
             targetException = ex;
         }
+        String message=targetException+"";
         if (isJSONResponse) {
             String callBack=request.getParameter("callback");
             ActionContext.getContext().getRequestUtils(request).setString("callback",callBack);
-            CbResult ret= CbResult.of(Status.ERR,0, targetException+"",null);
+            CbResult ret= CbResult.of(Status.ERR,0, "服务器异常，请联系管理员！【"+message+"】",null);
             ActionContext ctx = ActionContext.getContext();
             ctx.put(WebMvcCbConstants.ResultKey, ret);
             return ActionSupport.JSON;
@@ -529,7 +530,7 @@ public class BaseController implements ApplicationContextAware {
             MsgResult msgResult=new MsgResult();
             msgResult.setMsg( ex.getMessage());
             msgResult.setReturnURL("");
-            CbResult ret= CbResult.of(Status.ERR,0, targetException+"", msgResult);
+            CbResult ret= CbResult.of(Status.ERR,0, "服务器异常，请联系管理员！【"+message+"】", msgResult);
             ActionContext ctx = ActionContext.getContext();
             ctx.put(WebMvcCbConstants.ResultKey, ret);
             return ActionSupport.MESSAGE;
