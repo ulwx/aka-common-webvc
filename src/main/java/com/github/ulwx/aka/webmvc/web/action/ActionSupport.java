@@ -1,9 +1,6 @@
 package com.github.ulwx.aka.webmvc.web.action;
 
-import com.github.ulwx.aka.webmvc.ActionMethodInfo;
-import com.github.ulwx.aka.webmvc.BeanGet;
-import com.github.ulwx.aka.webmvc.WebMvcActiionContextConst;
-import com.github.ulwx.aka.webmvc.WebMvcCbConstants;
+import com.github.ulwx.aka.webmvc.*;
 import com.ulwx.tool.ObjectUtils;
 import com.ulwx.tool.RequestUtils;
 import com.ulwx.tool.StringUtils;
@@ -48,20 +45,20 @@ public  class ActionSupport {
 	public HttpSession getSession() {
 		return this.getRequest().getSession();
 	}
-	public static void setUserInfo(HttpServletRequest request,Object userInfo){
+	public static void setUserInfo(HttpServletRequest request, SessionUser userInfo){
 		request.getSession().setAttribute(WebMvcCbConstants.USER,userInfo);
 	}
-	public static  Object getUserInfo(HttpServletRequest request) {
-		return   request.getSession().getAttribute(WebMvcCbConstants.USER);
+	public static  SessionUser getUserInfo(HttpServletRequest request) {
+		return   (SessionUser)request.getSession().getAttribute(WebMvcCbConstants.USER);
 	}
-	public  static  Object getUserInfo(HttpSession session) {
-		return   session.getAttribute(WebMvcCbConstants.USER);
+	public  static  SessionUser getUserInfo(HttpSession session) {
+		return   (SessionUser)session.getAttribute(WebMvcCbConstants.USER);
 	}
-	public  void setUserInfo(Object userInfo) {
+	public  void setUserInfo(SessionUser userInfo) {
 		this.getSession().setAttribute(WebMvcCbConstants.USER,userInfo);
 	}
-	public  Object getUserInfo() {
-		return   this.getSession().getAttribute(WebMvcCbConstants.USER);
+	public  SessionUser getUserInfo() {
+		return   (SessionUser)this.getSession().getAttribute(WebMvcCbConstants.USER);
 	}
 
 
@@ -167,7 +164,15 @@ public  class ActionSupport {
 		}
 		return JsonViewSuc("成功",data);
 	}
+	public  String JsonView(boolean suc,Object data,String message){
+		if(suc){
+			this.buildResult(Status.SUC,0,data,message);
+		}else{
+			this.buildResult(Status.ERR,0,null,message);
+		}
 
+		return JSON;
+	}
 	public  String JsonViewError(String message){
 		this.buildResult(Status.ERR,0,null,message);
 		return JSON;

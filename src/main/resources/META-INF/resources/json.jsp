@@ -20,6 +20,7 @@
 	}
 	catch (Exception e)
 	{
+        e.getStackTrace();
 
 	}
 %>
