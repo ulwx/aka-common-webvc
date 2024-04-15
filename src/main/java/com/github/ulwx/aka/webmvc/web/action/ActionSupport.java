@@ -177,7 +177,10 @@ public  class ActionSupport {
 		this.buildResult(Status.ERR,0,null,message);
 		return JSON;
 	}
-
+	public  String JsonViewError(String message,Object data){
+		this.buildResult(Status.ERR,0,data,message);
+		return JSON;
+	}
 	public CbResult getResult(String view){
 		if(view==null) return null;
 		ActionContext  ctx = ActionContext.getContext();
@@ -191,6 +194,11 @@ public  class ActionSupport {
 	public  String JsonViewError(Integer errorCode, String message){
 
 		this.buildResult(Status.ERR,errorCode,null,message);
+		return JSON;
+	}
+	public  String JsonViewError(Integer errorCode, String message,Object data){
+
+		this.buildResult(Status.ERR,errorCode,data,message);
 		return JSON;
 	}
 	public  String JsonViewError(Integer errorCode){
