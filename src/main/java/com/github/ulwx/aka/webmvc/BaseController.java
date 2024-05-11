@@ -3,8 +3,6 @@ package com.github.ulwx.aka.webmvc;
 import com.github.ulwx.aka.webmvc.AkaWebMvcProperties.NameSpace;
 import com.github.ulwx.aka.webmvc.annotation.AkaMvcAction;
 import com.github.ulwx.aka.webmvc.annotation.AkaMvcActionMethod;
-import com.github.ulwx.aka.webmvc.exception.JsonServiceException;
-import com.github.ulwx.aka.webmvc.exception.JspServiceException;
 import com.github.ulwx.aka.webmvc.exception.ServiceException;
 import com.github.ulwx.aka.webmvc.utils.WebMvcUtils;
 import com.github.ulwx.aka.webmvc.web.action.*;
@@ -25,9 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller("com.github.ulwx.aka.webmvc.BaseController")
 public class BaseController implements ApplicationContextAware {
@@ -352,16 +348,38 @@ public class BaseController implements ApplicationContextAware {
             responseContentType=StringUtils.trim(akaMvcActionAnno.responseContentType());
         }
         Method[] methods=actionClass.getMethods();
-        Method method=null;
+        List<Method> methodList=new ArrayList<>();
         for(int i=0; i<methods.length; i++){
             if(methods[i].getName().equals(methodName)){
-                method=methods[i];
-                break;
+                Method method=methods[i];
+                if(method.getParameterTypes()!=null && method.getParameterTypes().length>1){
+                    continue;
+                }
+                if(method.getReturnType()!=String.class
+                        &&  !CbResult.class.isAssignableFrom(method.getReturnType())){
+                    continue;
+                }
+                methodList.add(method);
             }
         }
-        if(method==null){
-            throw new ServiceException(actionClass+"无法找到"+methodName+"方法！");
-        }
+       Method method=null;
+       if(methodList.size()!=1){
+           //throw new ServiceException(actionClass+"不能存在多个"+methodName+"名称方法！");
+           //查找无参的
+           for(Method m: methodList){
+               if(m.getParameterTypes()==null && m.getParameterTypes().length==0){
+                   method=m;
+                   break;
+               }
+           }
+       }else{
+           method=methodList.get(0);
+       }
+       if(method==null){
+           throw new ServiceException(actionClass+"无法找到符合"+methodName+"条件的方法！方法必须只能" +
+                   "有一个参数或无参数，返回类型必须为String或CbResult类型！");
+       }
+
         //method = actionClass.getMethod(methodName);
         annoClassMethodInfo.setMethod(method);
         annoClassMethodInfo.setActionClass(actionClass);
