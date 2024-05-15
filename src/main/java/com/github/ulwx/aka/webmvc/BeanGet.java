@@ -101,6 +101,7 @@ public class BeanGet implements ApplicationContextAware {
         }
     }
 
+
     public static  <T>  T getBean(Class<T> beanClass, HttpServletRequest hreq){
         return getBean(beanClass,hreq.getServletContext());
     }
