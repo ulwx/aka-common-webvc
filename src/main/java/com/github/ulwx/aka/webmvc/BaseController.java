@@ -367,7 +367,7 @@ public class BaseController implements ApplicationContextAware {
            //throw new ServiceException(actionClass+"不能存在多个"+methodName+"名称方法！");
            //查找无参的
            for(Method m: methodList){
-               if(m.getParameterTypes()==null && m.getParameterTypes().length==0){
+               if(m.getParameterTypes()==null || m.getParameterTypes().length==0){
                    method=m;
                    break;
                }
