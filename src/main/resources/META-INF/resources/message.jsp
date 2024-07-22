@@ -2,6 +2,7 @@
 <%@ page import="com.github.ulwx.aka.webmvc.web.action.MsgResult" %>
 <%@ page import="com.ulwx.tool.EscapeUtil" %>
 <%@ page import="com.github.ulwx.aka.webmvc.WebMvcCbConstants" %>
+<%@ page import="com.ulwx.tool.StringUtils" %>
 
 <%@ page language="java" contentType="text/html; charset=utf-8"
          pageEncoding="utf-8"%>
@@ -47,7 +48,9 @@ function url(){
       if(!returnUrl.equals("")){
     %>
     <div  style="margin-left: 40px;margin-top:10px">
+        <%if(StringUtils.hasText(returnUrl)){%>
         <a  href="javascript:void(0)"  onclick="url()">确定</a>
+        <%}%>
     </div>
     <%}%>
 </div>

@@ -4,6 +4,15 @@ public class MsgResult implements Result{
 
     private String msg="";
     private String returnURL="";
+    private Boolean showButton=true;
+
+    public Boolean getShowButton() {
+        return showButton;
+    }
+
+    public void setShowButton(Boolean showButton) {
+        this.showButton = showButton;
+    }
 
     public String getMsg() {
         return msg;
