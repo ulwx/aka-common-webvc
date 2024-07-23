@@ -107,8 +107,8 @@ public class BeanGet implements ApplicationContextAware {
     }
     public static   <T>  T getBean(Class<T> beanClass, ServletContext context){
         ApplicationContext ac = WebApplicationContextUtils.getWebApplicationContext(context);
-        T userService= (T)ac.getBean(beanClass);
-        return userService;
+        T bean= (T)ac.getBean(beanClass);
+        return bean;
 
     }
 
