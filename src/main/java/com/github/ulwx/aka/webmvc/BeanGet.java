@@ -20,25 +20,21 @@ public class BeanGet implements ApplicationContextAware {
     private static Object lock=new Object();
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
-        if(applicationContext==null) {
-            synchronized (lock) {
-                if(applicationContext==null) {
-                    applicationContext = context;
-                    lock.notifyAll();
-                }
-            }
-        }
+        applicationContext = context;
 
     }
 
     public static ApplicationContext getApplicationContext() {
         if(applicationContext==null){
-            synchronized (lock){
-                if(applicationContext==null){
-                    try {
-                        lock.wait();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+            while (true) {
+                synchronized (lock) {
+                    if (applicationContext == null) {
+                        try {
+                            Thread.sleep(50);
+                        }catch (Exception e){
+                        }
+                    }else{
+                        return applicationContext;
                     }
                 }
             }
