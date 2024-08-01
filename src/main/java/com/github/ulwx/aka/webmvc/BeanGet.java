@@ -17,7 +17,6 @@ import java.util.Map;
 public class BeanGet implements ApplicationContextAware {
     private  static Logger logger = Logger.getLogger(BeanGet.class);
     private  static volatile ApplicationContext applicationContext;
-    private static Object lock=new Object();
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
         applicationContext = context;
@@ -27,10 +26,13 @@ public class BeanGet implements ApplicationContextAware {
     public static ApplicationContext getApplicationContext() {
         if(applicationContext==null){
             while (true) {
-                synchronized (lock) {
+                synchronized (BeanGet.class) {
                     if (applicationContext == null) {
                         try {
                             Thread.sleep(50);
+                            if(applicationContext!=null){
+                                return applicationContext;
+                            }
                         }catch (Exception e){
                         }
                     }else{
