@@ -13,11 +13,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.util.Map;
+
+import static com.github.ulwx.aka.webmvc.WebMvcCbConstants.TRANSLATE;
+
 public  class ActionSupport {
 	private static Logger logger = LoggerFactory.getLogger(ActionSupport.class);
 
 	protected BeanGet beanGet;
-
 	//全局预定义逻辑视图名称
 	public static final String JSON = "json";
 	public  static  final String FORWARD = "forward";
@@ -154,6 +156,10 @@ public  class ActionSupport {
 		this.buildResult(Status.SUC,0,data,message);
 		return JSON;
 
+	}
+	public void needTranslate(Translate translate){
+		ActionContext ctx = ActionContext.getContext();
+		ctx.put(TRANSLATE, translate );
 	}
 	public  String JsonViewSuc(){
 		return JsonViewSuc("成功",null);
