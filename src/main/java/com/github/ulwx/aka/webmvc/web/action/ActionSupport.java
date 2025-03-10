@@ -34,7 +34,18 @@ public  class ActionSupport {
 	public  static  final String _MAIN = "main";
 
 	public  static  final String LOGIN="login";
-
+	public  <T>  T beanGet(Class<T> beanClass, HttpServletRequest hreq){
+		return beanGet.bean(beanClass,hreq);
+	}
+	public   <T> Map<String, T> beanManyGet(Class<T> beanClass){
+		return beanGet.beans(beanClass);
+	}
+	public  <T> T beanGet(Class<T> beanClass,String name){
+		return beanGet.bean(beanClass,name);
+	}
+	public  <T> T beanGet(Class<T> beanClass) {
+		return this.beanGet.bean(beanClass);
+	}
 
 	public HttpServletRequest getRequest() {
 		return ServletActionContext.getRequest();
