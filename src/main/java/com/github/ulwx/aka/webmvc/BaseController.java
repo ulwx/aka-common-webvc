@@ -491,7 +491,9 @@ public class BaseController implements ApplicationContextAware {
             Map<String, String> viewsMap = actionMethodInfo.getViewsMap();
             if (viewsMap != null) {
                 viewURL = StringUtils.trim(viewsMap.get(viewName));
-                if(StringUtils.isEmpty(viewURL)){
+                if(StringUtils.isEmpty(viewURL) &&
+                        (viewName.startsWith("forward:")
+                                || viewName.startsWith("redirect:"))){
                     viewURL=viewName;
                 }
                 finalViewURL = StringUtils.trim(this.getView(viewURL, actionMethodInfo.getLogicActionMethodName()));
