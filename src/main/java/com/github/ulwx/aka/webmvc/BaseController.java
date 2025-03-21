@@ -543,7 +543,7 @@ public class BaseController implements ApplicationContextAware {
             CbResult ret= CbResult.of(Status.ERR,0, "服务器异常，请联系管理员！【"+message+"】",null);
             ActionContext ctx = ActionContext.getContext();
             ctx.put(WebMvcCbConstants.ResultKey, ret);
-            return ActionSupport.JSON;
+            return "forward:/"+ActionSupport.JSON+".jsp";
         } else {
             MsgResult msgResult=new MsgResult();
             msgResult.setMsg( ex.getMessage());
@@ -551,7 +551,8 @@ public class BaseController implements ApplicationContextAware {
             CbResult ret= CbResult.of(Status.ERR,0, "服务器异常，请联系管理员！【"+message+"】", msgResult);
             ActionContext ctx = ActionContext.getContext();
             ctx.put(WebMvcCbConstants.ResultKey, ret);
-            return ActionSupport.MESSAGE;
+            return "forward:/"+ActionSupport.MESSAGE+".jsp";
+
         }
     }
     @Override
