@@ -491,6 +491,9 @@ public class BaseController implements ApplicationContextAware {
             Map<String, String> viewsMap = actionMethodInfo.getViewsMap();
             if (viewsMap != null) {
                 viewURL = StringUtils.trim(viewsMap.get(viewName));
+                if(StringUtils.isEmpty(viewURL)){
+                    viewURL=viewName;
+                }
                 finalViewURL = StringUtils.trim(this.getView(viewURL, actionMethodInfo.getLogicActionMethodName()));
             }
 
@@ -530,11 +533,15 @@ public class BaseController implements ApplicationContextAware {
     private String handException(boolean isJSONResponse,HttpServletRequest request,Exception ex){
         log.error(ex + "", ex);
         Exception targetException = null;
-        if (ex instanceof InvocationTargetException) {
+        if (ex instanceof InvocationTargetException ) {
             InvocationTargetException itException = (InvocationTargetException) ex;
             targetException = (Exception) itException.getCause();
         } else {
-            targetException = ex;
+            Throwable t=ex;
+            while(t.getCause()!=null){
+                t=t.getCause();
+            }
+            targetException=(Exception)t;
         }
         String message=targetException+"";
         if (isJSONResponse) {
