@@ -29,7 +29,7 @@
 	}else{
 		response.sendRedirect(request.getContextPath()+"/"+redirectURL);
 	}
-	JspLog.debug(redirectURL);
+	//JspLog.debug(redirectURL);
 	response.sendRedirect(redirectURL);
 
 %>

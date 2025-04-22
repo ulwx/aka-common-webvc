@@ -18,7 +18,7 @@
         if(TRANSLATE!=null){
             str= TRANSLATE.translate(str);
         }
-        JspLog.debug(str);
+        //JspLog.debug(str);
         out.write(str);
         out.flush();
 	}
