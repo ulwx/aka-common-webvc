@@ -14,7 +14,7 @@ public class CbResult<T> {
     //"状态，200表示成功， -100表示失败
     @Schema(name = "status", description = "状态码,1表示成功， 0表示失败")
     private Integer status = Status.SUC;
-    @Schema(name = "error", description = "错误码，只有status=-100时，error才有意义")
+    @Schema(name = "error", description = "错误码，只有status=0时，error才有意义")
     private Integer error = ErrorCode.NO_ERROR;
     @Schema(name = "message", description = "提示性信息")
     private String message = "成功";
