@@ -15,17 +15,23 @@ public  class ServletActionContext {
 
     public static  HttpServletRequest getRequest(){
         ServletRequestAttributes requestAttributes = getRequestAttributes();
+        if(requestAttributes == null){return null;}
         return requestAttributes.getRequest();
     }
 
     public static HttpServletResponse getResponse(){
         ServletRequestAttributes requestAttributes = getRequestAttributes();
+        if(requestAttributes == null){return null;}
         return requestAttributes.getResponse();
     }
     public static HttpSession getSession(){
-        return  getRequest().getSession();
+        HttpServletRequest request = getRequest();
+        if(request == null){return null;}
+        return  request.getSession();
     }
     public static HttpSession getSession(boolean create){
+        HttpServletRequest request = getRequest();
+        if(request == null){return null;}
         return  getRequest().getSession(create);
     }
 }
