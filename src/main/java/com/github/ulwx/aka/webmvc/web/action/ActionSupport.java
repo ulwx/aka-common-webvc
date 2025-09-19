@@ -64,6 +64,7 @@ public  class ActionSupport {
 	public static  SessionUser getUserInfo(HttpServletRequest request) {
 		return   (SessionUser)request.getSession().getAttribute(WebMvcCbConstants.USER);
 	}
+
 	public  static  SessionUser getUserInfo(HttpSession session) {
 		return   (SessionUser)session.getAttribute(WebMvcCbConstants.USER);
 	}
@@ -73,7 +74,13 @@ public  class ActionSupport {
 	public  SessionUser getUserInfo() {
 		return   (SessionUser)this.getSession().getAttribute(WebMvcCbConstants.USER);
 	}
-
+	public  static SessionUser getUser() {
+		HttpServletRequest request=ServletActionContext.getRequest();
+		if(request!=null){
+			return (SessionUser)request.getSession().getAttribute(WebMvcCbConstants.USER);
+		}
+		return null;
+	}
 
 	/**
 	 * 获取HttpServletResponse对象
