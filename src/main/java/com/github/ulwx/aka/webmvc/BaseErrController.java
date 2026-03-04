@@ -6,12 +6,13 @@ import com.github.ulwx.aka.webmvc.web.action.*;
 import com.ulwx.tool.NetUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.error.ErrorController;
+
+import org.springframework.boot.webmvc.error.ErrorController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
@@ -31,9 +32,9 @@ public class BaseErrController implements ErrorController {
     //针对找不到指定资源的错误，这里会拦截
     public ModelAndView handle(HttpServletRequest request) {
         //WebMvcAutoConfiguration
-        String statusCode = StringUtils.trim(request.getAttribute("javax.servlet.error.status_code"));
-        String message = StringUtils.trim(request.getAttribute("javax.servlet.error.message"));
-        Exception exception=(Exception)request.getAttribute("javax.servlet.error.exception");
+        String statusCode = StringUtils.trim(request.getAttribute("jakarta.servlet.error.status_code"));
+        String message = StringUtils.trim(request.getAttribute("jakarta.servlet.error.message"));
+        Exception exception=(Exception)request.getAttribute("jakarta.servlet.error.exception");
         String exceptionStr="";
         message=message+";";
         ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
@@ -53,7 +54,7 @@ public class BaseErrController implements ErrorController {
         message=message+";"+exceptionStr;
         message=StringUtils.trimLeadingString(message,";");
         message=StringUtils.trimTailString(message,";");
-        String errerSourceUrl = StringUtils.trim(request.getAttribute("javax.servlet.error.request_uri"));
+        String errerSourceUrl = StringUtils.trim(request.getAttribute("jakarta.servlet.error.request_uri"));
         if(statusCode.equals("404")){
             if(StringUtils.hasText(message)){
                 message="【"+message+"】";

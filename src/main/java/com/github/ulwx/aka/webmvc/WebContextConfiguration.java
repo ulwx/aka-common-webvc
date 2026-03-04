@@ -3,11 +3,12 @@ package com.github.ulwx.aka.webmvc;
 import com.github.ulwx.aka.webmvc.exception.JsonServiceException;
 import com.github.ulwx.aka.webmvc.exception.JspServiceException;
 import com.github.ulwx.aka.webmvc.web.action.*;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.boot.web.server.servlet.context.ServletComponentScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -21,8 +22,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Properties;
 
@@ -64,8 +65,10 @@ public class WebContextConfiguration implements WebMvcConfigurer {
     @Override
     public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
         SimpleMappingExceptionResolver simpleMappingExceptionResolver=new SimpleMappingExceptionResolver(){
+
             @Override
-            protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+            protected ModelAndView doResolveException(HttpServletRequest request,
+                                                      HttpServletResponse response, Object handler, Exception ex) {
 
                 ModelAndView modelAndView= super.doResolveException(request, response, handler, ex);
                 if(modelAndView!=null){

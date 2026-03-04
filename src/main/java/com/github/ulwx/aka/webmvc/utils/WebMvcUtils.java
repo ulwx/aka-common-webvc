@@ -3,7 +3,7 @@ package com.github.ulwx.aka.webmvc.utils;
 import com.github.ulwx.aka.dbutils.tool.support.StringUtils;
 import com.github.ulwx.aka.webmvc.WebMvcCbConstants;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class WebMvcUtils {
     public static boolean isAjax(HttpServletRequest hreq) {

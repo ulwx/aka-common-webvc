@@ -1,7 +1,7 @@
 package com.github.ulwx.aka.webmvc;
 
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface LogicActionExeInfoBuilder {
     /**

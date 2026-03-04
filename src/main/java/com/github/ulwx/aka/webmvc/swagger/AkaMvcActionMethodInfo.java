@@ -33,6 +33,10 @@ public class AkaMvcActionMethodInfo {
     public void init(){
         AkaMvcActionMethodInfo parent=this;
         RequestMapping requestMapping =new RequestMapping(){
+            @Override
+            public String version() {
+                return "";
+            }
 
             @Override
             public Class<? extends Annotation> annotationType() {

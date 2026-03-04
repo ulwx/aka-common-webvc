@@ -2,7 +2,7 @@ package com.github.ulwx.aka.webmvc;
 
 import com.ulwx.tool.RequestUtils;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 请求处理器
