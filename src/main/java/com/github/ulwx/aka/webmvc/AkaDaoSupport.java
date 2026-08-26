@@ -12,17 +12,16 @@ public abstract class AkaDaoSupport {
     protected BeanGet beanGet;
     protected MDataBaseTemplate template;
 
-
-    protected  <T>  T beanGet(Class<T> beanClass, HttpServletRequest hreq){
+    public  <T>  T beanGet(Class<T> beanClass, HttpServletRequest hreq){
         return beanGet.bean(beanClass,hreq);
     }
-    protected   <T> Map<String, T> beanManyGet(Class<T> beanClass){
+    public   <T> Map<String, T> beanManyGet(Class<T> beanClass){
         return beanGet.beans(beanClass);
     }
-    protected  <T> T beanGet(Class<T> beanClass,String name){
+    public  <T> T beanGet(Class<T> beanClass,String name){
         return beanGet.bean(beanClass,name);
     }
-    protected  <T> T beanGet(Class<T> beanClass) {
+    public  <T> T beanGet(Class<T> beanClass) {
         return this.beanGet.bean(beanClass);
     }
     public BeanGet getBeanGet() {
