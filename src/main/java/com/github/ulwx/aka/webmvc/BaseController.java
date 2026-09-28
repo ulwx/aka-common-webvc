@@ -172,7 +172,8 @@ public class BaseController implements ApplicationContextAware {
                                 CbRequest cbRequest= (CbRequest)argObj;
                                 if(cbRequest.getRequestId()==null ||
                                         cbRequest.getRequestId().trim().isEmpty()){
-                                    throw new RuntimeException("请求里requestId必须设置！");
+                                    cbRequest.setRequestId(SnowflakeIdWorker.instance.nextId()+"");
+                                   // throw new RuntimeException("请求里requestId必须设置！");
                                 }
                             }
                         } else {
@@ -192,7 +193,9 @@ public class BaseController implements ApplicationContextAware {
                 } else {
                     ret = method.invoke(cba);
                 }
+                log.debug("ret="+ret);
                 if (ret == null) {
+                    log.debug("ret+++++");
                     viewName = ResultType.json.toString();
                     CbResult cbResult = new CbResult();
                     cbResult.setError(ErrorCode.VIEW_ERROR);
